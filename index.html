@@ -276,7 +276,6 @@
       white-space: pre-line;
       line-height: 1.5;
     }
-
     .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
     .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
   </style>
@@ -320,8 +319,8 @@
   </div>
 
   <script>
-    const SHEET_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
-    const TARGET_FILE_URL = "https://docs.google.com/spreadsheets/d/1-bU6gUz18WPbaWkUxoXSm5ue91CgmwjL/edit";
+    const SHEET_URL = "PASTE_YOUR_WEB_APP_EXEC_URL_HERE";
+    const TARGET_FILE_URL = "https://script.google.com/macros/s/AKfycby_WhcK1qPu0sgM_JOlZ4yK1yaSuC4MDPG_oYx7_QiCfPW6Ja6GU79k-WVvupvJa70kfw/exec";
 
     const bodyParts = [
       { id: "upper_back",    label: "Upper back",      tag: "back" },
@@ -429,10 +428,12 @@
       iframe.onload = function() {
         toast.className = "toast success";
         toast.textContent =
-`Submitted successfully — data sent to Google Sheets.
+`Request sent.
 
-File written:
-${TARGET_FILE_URL}`;
+Check this spreadsheet:
+${TARGET_FILE_URL}
+
+If rows were not added, open tab "List 2" to see debug status.`;
 
         btn.textContent = "Submit again";
         btn.disabled = false;
