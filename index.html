@@ -102,7 +102,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     @media (max-width: 480px) {
@@ -110,6 +110,10 @@
       .legend-grid { grid-template-columns: repeat(7, 1fr); }
       .legend-item { font-size: 9px; }
       .legend-item .val { font-size: 10px; }
+    }
+
+    .field {
+      margin-bottom: 1rem;
     }
 
     .field label {
@@ -271,11 +275,20 @@
       padding: 10px 14px;
       border-radius: var(--radius-sm);
       font-size: 13px;
-      text-align: center;
+      text-align: left;
       font-family: 'IBM Plex Mono', monospace;
+      line-height: 1.5;
+      white-space: pre-line;
+      word-break: break-word;
     }
+
     .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
     .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
+
+    .toast a {
+      color: inherit;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -309,10 +322,12 @@
         <input type="text" id="session" placeholder="e.g. baseline" />
       </div>
     </div>
+
     <div class="field">
- 	 <label>Plot / Setup Used</label>
- 	 <input type="text" id="plot_used" placeholder="e.g. Plot A" />
+      <label>Plot / Setup Used</label>
+      <input type="text" id="plot_used" placeholder="e.g. Plot A" />
     </div>
+
     <div id="parts-container"></div>
 
     <button class="btn-submit" id="submitBtn" onclick="submitToSheets()">Submit to Google Sheets</button>
@@ -385,38 +400,54 @@
     });
 
     async function submitToSheets() {
-      const pid     = document.getElementById("pid").value.trim() || "unknown";
+      const pid = document.getElementById("pid").value.trim() || "unknown";
       const session = document.getElementById("session").value.trim() || "";
-      const ts      = new Date().toISOString();
-      const btn     = document.getElementById("submitBtn");
-      const toast   = document.getElementById("toast");
+      const plotUsed = document.getElementById("plot_used").value.trim() || "";
+      const ts = new Date().toISOString();
+      const btn = document.getElementById("submitBtn");
+      const toast = document.getElementById("toast");
 
       const rows = bodyParts.map(part => ({
-        timestamp:         ts,
-        participant_id:    pid,
-        session:           session,
-        body_part:         part.label,
+        timestamp: ts,
+        participant_id: pid,
+        session: session,
+        plot_used: plotUsed,
+        body_part: part.label,
         thermal_sensation: parseInt(document.getElementById(part.id + "_sens").value),
-        thermal_comfort:   parseInt(document.getElementById(part.id + "_comf").value),
-        wanted_action:     parseInt(document.getElementById(part.id + "_act").value)
+        thermal_comfort: parseInt(document.getElementById(part.id + "_comf").value),
+        wanted_action: parseInt(document.getElementById(part.id + "_act").value)
       }));
 
-      btn.disabled    = true;
+      btn.disabled = true;
       btn.textContent = "Sending…";
       toast.className = "toast";
       toast.textContent = "";
 
       try {
-        await fetch(SHEET_URL, {
+        const res = await fetch(SHEET_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rows })
         });
 
-        toast.className   = "toast success";
-        toast.textContent = "Submitted successfully — data sent to Google Sheets.";
-        btn.textContent   = "Submit again";
+        const result = await res.json();
+
+        if (!result.ok) {
+          throw new Error(result.error || "Unknown error");
+        }
+
+        const fileName = result.targetSpreadsheetName || "Google Sheet";
+        const fileUrl = result.targetSpreadsheetUrl || "";
+
+        toast.className = "toast success";
+        toast.innerHTML = `
+Submitted successfully — data sent to Google Sheets.
+
+File written:
+${fileUrl ? `<a href="${fileUrl}" target="_blank" rel="noopener noreferrer">${fileName}</a>` : fileName}
+        `.trim();
+
+        btn.textContent = "Submit again";
 
         bodyParts.forEach(part => {
           ["sens","comf","act"].forEach(m => {
@@ -424,16 +455,17 @@
           });
           document.getElementById(`${part.id}_sens_lbl`).textContent = "Neutral (0)";
           document.getElementById(`${part.id}_comf_lbl`).textContent = "Comfortable (0)";
-          document.getElementById(`${part.id}_act_lbl`).textContent  = "No change (0)";
+          document.getElementById(`${part.id}_act_lbl`).textContent = "No change (0)";
         });
 
-        document.getElementById("pid").value     = "";
+        document.getElementById("pid").value = "";
         document.getElementById("session").value = "";
+        document.getElementById("plot_used").value = "";
 
       } catch (err) {
-        toast.className   = "toast error";
-        toast.textContent = "Error sending data. Check the Apps Script URL and try again.";
-        btn.textContent   = "Submit to Google Sheets";
+        toast.className = "toast error";
+        toast.textContent = "Error sending data: " + err.message;
+        btn.textContent = "Submit to Google Sheets";
       }
 
       btn.disabled = false;
