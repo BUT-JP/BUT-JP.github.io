@@ -271,9 +271,12 @@
       padding: 10px 14px;
       border-radius: var(--radius-sm);
       font-size: 13px;
-      text-align: center;
+      text-align: left;
       font-family: 'IBM Plex Mono', monospace;
+      white-space: pre-line;
+      line-height: 1.5;
     }
+
     .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
     .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
   </style>
@@ -317,7 +320,8 @@
   </div>
 
   <script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyuNyOFyQFTu6NcnQEq2MZEkYQR43n4Jjw5RYt_Wv_PRP9dH1LAPB8_cCIFmyv6p0_UZg/exec";
+    const SHEET_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+    const TARGET_FILE_URL = "https://docs.google.com/spreadsheets/d/1-bU6gUz18WPbaWkUxoXSm5ue91CgmwjL/edit";
 
     const bodyParts = [
       { id: "upper_back",    label: "Upper back",      tag: "back" },
@@ -381,39 +385,57 @@
       container.appendChild(card);
     });
 
-    async function submitToSheets() {
-      const pid     = document.getElementById("pid").value.trim() || "unknown";
+    function submitToSheets() {
+      const pid = document.getElementById("pid").value.trim() || "unknown";
       const session = document.getElementById("session").value.trim() || "";
-      const ts      = new Date().toISOString();
-      const btn     = document.getElementById("submitBtn");
-      const toast   = document.getElementById("toast");
+      const ts = new Date().toISOString();
+      const btn = document.getElementById("submitBtn");
+      const toast = document.getElementById("toast");
 
       const rows = bodyParts.map(part => ({
-        timestamp:         ts,
-        participant_id:    pid,
-        session:           session,
-        body_part:         part.label,
+        timestamp: ts,
+        participant_id: pid,
+        session: session,
+        body_part: part.label,
         thermal_sensation: parseInt(document.getElementById(part.id + "_sens").value),
-        thermal_comfort:   parseInt(document.getElementById(part.id + "_comf").value),
-        wanted_action:     parseInt(document.getElementById(part.id + "_act").value)
+        thermal_comfort: parseInt(document.getElementById(part.id + "_comf").value),
+        wanted_action: parseInt(document.getElementById(part.id + "_act").value)
       }));
 
-      btn.disabled    = true;
+      btn.disabled = true;
       btn.textContent = "Sending…";
       toast.className = "toast";
       toast.textContent = "";
 
-      try {
-        await fetch(SHEET_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rows })
-        });
+      const iframe = document.createElement("iframe");
+      iframe.name = "hidden_iframe_submit";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
 
-        toast.className   = "toast success";
-        toast.textContent = "Submitted successfully — data sent to Google Sheets.";
-        btn.textContent   = "Submit again";
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = SHEET_URL;
+      form.target = "hidden_iframe_submit";
+      form.style.display = "none";
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "payload";
+      input.value = JSON.stringify({ rows });
+
+      form.appendChild(input);
+      document.body.appendChild(form);
+
+      iframe.onload = function() {
+        toast.className = "toast success";
+        toast.textContent =
+`Submitted successfully — data sent to Google Sheets.
+
+File written:
+${TARGET_FILE_URL}`;
+
+        btn.textContent = "Submit again";
+        btn.disabled = false;
 
         bodyParts.forEach(part => {
           ["sens","comf","act"].forEach(m => {
@@ -424,16 +446,16 @@
           document.getElementById(`${part.id}_act_lbl`).textContent  = "No change (0)";
         });
 
-        document.getElementById("pid").value     = "";
+        document.getElementById("pid").value = "";
         document.getElementById("session").value = "";
 
-      } catch (err) {
-        toast.className   = "toast error";
-        toast.textContent = "Error sending data. Check the Apps Script URL and try again.";
-        btn.textContent   = "Submit to Google Sheets";
-      }
+        setTimeout(() => {
+          form.remove();
+          iframe.remove();
+        }, 500);
+      };
 
-      btn.disabled = false;
+      form.submit();
     }
   </script>
 </body>
