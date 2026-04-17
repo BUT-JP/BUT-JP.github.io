@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermal Comfort Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F3EE;
+      --surface: #FFFFFF;
+      --border: #DDDBD4;
+      --text-primary: #1A1916;
+      --text-secondary: #6B6860;
+      --text-hint: #A8A59E;
+      --accent: #1A1916;
+      --tag-back-bg: #E6F1FB; --tag-back-fg: #0C447C;
+      --tag-front-bg: #EAF3DE; --tag-front-fg: #27500A;
+      --tag-head-bg: #EEEDFE; --tag-head-fg: #3C3489;
+      --tag-limbs-bg: #FAEEDA; --tag-limbs-fg: #633806;
+      --success-bg: #EAF3DE; --success-fg: #27500A;
+      --error-bg: #FCEBEB; --error-fg: #791F1F;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page-header {
+      max-width: 680px;
+      margin: 0 auto 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .page-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .scale-legend {
+      max-width: 680px;
+      margin: 0 auto 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+    }
+
+    .scale-legend h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+
+    .legend-item {
+      font-size: 11px;
+      color: var(--text-hint);
+      line-height: 1.4;
+    }
+
+    .legend-item .val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 12px;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .form-wrap { max-width: 680px; margin: 0 auto; }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      .meta-row { grid-template-columns: 1fr; }
+      .legend-grid { grid-template-columns: repeat(7, 1fr); }
+      .legend-item { font-size: 9px; }
+      .legend-item .val { font-size: 10px; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .field input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 14px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--surface);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field input[type="text"]:focus { border-color: var(--accent); }
+
+    .body-part-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .part-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .section-tag {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tag-back  { background: var(--tag-back-bg);  color: var(--tag-back-fg); }
+    .tag-front { background: var(--tag-front-bg); color: var(--tag-front-fg); }
+    .tag-head  { background: var(--tag-head-bg);  color: var(--tag-head-fg); }
+    .tag-limbs { background: var(--tag-limbs-bg); color: var(--tag-limbs-fg); }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 560px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+
+    .metric-block { display: flex; flex-direction: column; gap: 5px; }
+
+    .metric-block .m-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-secondary);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .metric-block .m-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      min-height: 18px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--surface);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--surface);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .scale-ends {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-hint);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 13px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-submit:hover { opacity: 0.85; }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .toast {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      text-align: center;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
+    .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Thermal Comfort Survey</h1>
+    <p>Rate each body region across three dimensions: thermal sensation, thermal comfort, and wanted action. Scale: −3 to +3 (ASHRAE 7-point).</p>
+  </div>
+
+  <div class="scale-legend">
+    <h3>Scale reference</h3>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="val">−3</span>Cold / Very uncomf. / Much cooler</div>
+      <div class="legend-item"><span class="val">−2</span>Cool / Uncomfortable / Cooler</div>
+      <div class="legend-item"><span class="val">−1</span>Slightly cool / Slightly uncomf. / Slightly cooler</div>
+      <div class="legend-item"><span class="val">0</span>Neutral / Comfortable / No change</div>
+      <div class="legend-item"><span class="val">+1</span>Slightly warm / Slightly uncomf. / Slightly warmer</div>
+      <div class="legend-item"><span class="val">+2</span>Warm / Uncomfortable / Warmer</div>
+      <div class="legend-item"><span class="val">+3</span>Hot / Very uncomf. / Much warmer</div>
+    </div>
+  </div>
+
+  <div class="form-wrap">
+    <div class="meta-row">
+      <div class="field">
+        <label>Participant ID</label>
+        <input type="text" id="pid" placeholder="e.g. P001" />
+      </div>
+      <div class="field">
+        <label>Session / Condition</label>
+        <input type="text" id="session" placeholder="e.g. baseline" />
+      </div>
+    </div>
+
+    <div id="parts-container"></div>
+
+    <button class="btn-submit" id="submitBtn" onclick="submitToSheets()">Submit to Google Sheets</button>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJtHFjPsYwTatMtZK6_4Mbb_GrUjIiWKIU3wqDFVlqPiIVLadzxHl34KRgRFol50Wz/exec";
+
+    const bodyParts = [
+      { id: "upper_back",    label: "Upper back",      tag: "back" },
+      { id: "lower_back",    label: "Lower back",      tag: "back" },
+      { id: "seat",          label: "Seat",            tag: "back" },
+      { id: "thighs_back",   label: "Thighs back",     tag: "back" },
+      { id: "face",          label: "Face",            tag: "head" },
+      { id: "head",          label: "Head",            tag: "head" },
+      { id: "chest",         label: "Chest",           tag: "front" },
+      { id: "arms",          label: "Arms",            tag: "limbs" },
+      { id: "hands",         label: "Hands",           tag: "limbs" },
+      { id: "thighs_front",  label: "Thighs front",    tag: "front" },
+      { id: "calves_shins",  label: "Calves + Shins",  tag: "limbs" },
+      { id: "feet",          label: "Feet",            tag: "limbs" }
+    ];
+
+    const tagLabel = { back: "posterior", front: "anterior", head: "head", limbs: "limbs" };
+
+    const sensLabels  = ["Cold (−3)","Cool (−2)","Slightly cool (−1)","Neutral (0)","Slightly warm (+1)","Warm (+2)","Hot (+3)"];
+    const comfLabels  = ["Very uncomf. (−3)","Uncomfortable (−2)","Slightly uncomf. (−1)","Comfortable (0)","Slightly uncomf. (+1)","Uncomfortable (+2)","Very uncomf. (+3)"];
+    const actLabels   = ["Much cooler (−3)","Cooler (−2)","Slightly cooler (−1)","No change (0)","Slightly warmer (+1)","Warmer (+2)","Much warmer (+3)"];
+
+    const sensText = v => sensLabels[parseInt(v)+3];
+    const comfText = v => comfLabels[parseInt(v)+3];
+    const actText  = v => actLabels[parseInt(v)+3];
+
+    const container = document.getElementById("parts-container");
+
+    bodyParts.forEach(part => {
+      const card = document.createElement("div");
+      card.className = "body-part-card";
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="part-title">${part.label}</span>
+          <span class="section-tag tag-${part.tag}">${tagLabel[part.tag]}</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-block">
+            <span class="m-label">Thermal sensation</span>
+            <span class="m-value" id="${part.id}_sens_lbl">Neutral (0)</span>
+            <input type="range" min="-3" max="3" value="0" step="1" id="${part.id}_sens"
+              oninput="document.getElementById('${part.id}_sens_lbl').textContent = sensText(this.value)" />
+            <div class="scale-ends"><span>−3</span><span>+3</span></div>
+          </div>
+          <div class="metric-block">
+            <span class="m-label">Thermal comfort</span>
+            <span class="m-value" id="${part.id}_comf_lbl">Comfortable (0)</span>
+            <input type="range" min="-3" max="3" value="0" step="1" id="${part.id}_comf"
+              oninput="document.getElementById('${part.id}_comf_lbl').textContent = comfText(this.value)" />
+            <div class="scale-ends"><span>−3</span><span>+3</span></div>
+          </div>
+          <div class="metric-block">
+            <span class="m-label">Wanted action</span>
+            <span class="m-value" id="${part.id}_act_lbl">No change (0)</span>
+            <input type="range" min="-3" max="3" value="0" step="1" id="${part.id}_act"
+              oninput="document.getElementById('${part.id}_act_lbl').textContent = actText(this.value)" />
+            <div class="scale-ends"><span>−3</span><span>+3</span></div>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    async function submitToSheets() {
+      const pid     = document.getElementById("pid").value.trim() || "unknown";
+      const session = document.getElementById("session").value.trim() || "";
+      const ts      = new Date().toISOString();
+      const btn     = document.getElementById("submitBtn");
+      const toast   = document.getElementById("toast");
+
+      const rows = bodyParts.map(part => ({
+        timestamp:         ts,
+        participant_id:    pid,
+        session:           session,
+        body_part:         part.label,
+        thermal_sensation: parseInt(document.getElementById(part.id + "_sens").value),
+        thermal_comfort:   parseInt(document.getElementById(part.id + "_comf").value),
+        wanted_action:     parseInt(document.getElementById(part.id + "_act").value)
+      }));
+
+      btn.disabled    = true;
+      btn.textContent = "Sending…";
+      toast.className = "toast";
+      toast.textContent = "";
+
+      try {
+        await fetch(SHEET_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rows })
+        });
+
+        toast.className   = "toast success";
+        toast.textContent = "Submitted successfully — data sent to Google Sheets.";
+        btn.textContent   = "Submit again";
+
+        bodyParts.forEach(part => {
+          ["sens","comf","act"].forEach(m => {
+            document.getElementById(`${part.id}_${m}`).value = 0;
+          });
+          document.getElementById(`${part.id}_sens_lbl`).textContent = "Neutral (0)";
+          document.getElementById(`${part.id}_comf_lbl`).textContent = "Comfortable (0)";
+          document.getElementById(`${part.id}_act_lbl`).textContent  = "No change (0)";
+        });
+
+        document.getElementById("pid").value     = "";
+        document.getElementById("session").value = "";
+
+      } catch (err) {
+        toast.className   = "toast error";
+        toast.textContent = "Error sending data. Check the Apps Script URL and try again.";
+        btn.textContent   = "Submit to Google Sheets";
+      }
+
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
