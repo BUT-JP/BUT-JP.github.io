@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Participant Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F3EE;
+      --surface: #FFFFFF;
+      --border: #DDDBD4;
+      --text-primary: #1A1916;
+      --text-secondary: #6B6860;
+      --text-hint: #A8A59E;
+      --accent: #1A1916;
+      --success-bg: #EAF3DE; --success-fg: #27500A;
+      --error-bg: #FCEBEB;   --error-fg: #791F1F;
+      --info-bg: #E6F1FB;    --info-fg: #0C447C;
+      --radius: 10px; --radius-sm: 6px;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page-header {
+      max-width: 560px;
+      margin: 0 auto 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px; font-weight: 500;
+      letter-spacing: -0.3px; margin-bottom: 6px;
+    }
+
+    .page-header p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    .wrap { max-width: 560px; margin: 0 auto; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="number"],
+    .field select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 14px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--surface);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+    }
+
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .field input:read-only { background: var(--bg); color: var(--text-secondary); cursor: not-allowed; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Sensitivity slider */
+    .sensitivity-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .sensitivity-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 4px; border-radius: 2px;
+      background: var(--border); outline: none; cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); cursor: pointer;
+      border: 2px solid var(--surface);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); cursor: pointer;
+      border: 2px solid var(--surface);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .scale-ends {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-hint);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* Lookup section */
+    .lookup-row { display: flex; gap: 8px; }
+    .lookup-row input { flex: 1; }
+
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+      background: var(--surface); color: var(--text-primary);
+      transition: background 0.1s;
+    }
+    .btn:hover { background: var(--bg); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      width: 100%; padding: 13px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; font-weight: 500; letter-spacing: 0.04em;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      margin-top: 1.5rem;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .toast {
+      display: none; margin-top: 12px; padding: 12px 14px;
+      border-radius: var(--radius-sm); font-size: 13px;
+      font-family: 'IBM Plex Mono', monospace; line-height: 1.5;
+    }
+    .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
+    .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
+    .toast.info    { display: block; background: var(--info-bg);    color: var(--info-fg); }
+
+    .id-badge {
+      display: none;
+      background: var(--info-bg);
+      border: 1px solid #B5D4F4;
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .id-badge.visible { display: block; }
+
+    .id-badge .label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: #185FA5; margin-bottom: 8px;
+    }
+
+    .id-badge .id-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 28px; font-weight: 500;
+      color: #0C447C; letter-spacing: 0.05em;
+    }
+
+    .id-badge .id-note {
+      font-size: 12px; color: #378ADD;
+      margin-top: 6px; line-height: 1.5;
+    }
+
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .nav-link {
+      display: block; text-align: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; color: var(--text-secondary);
+      text-decoration: none; margin-top: 1.5rem;
+    }
+    .nav-link:hover { color: var(--text-primary); }
+
+    @media (max-width: 480px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Participant Profile</h1>
+    <p>Create your profile once. Your Participant ID will be generated automatically and linked to your email for future sessions.</p>
+  </div>
+
+  <div class="wrap">
+
+    <!-- Lookup existing profile -->
+    <div class="card">
+      <div class="card-title">Already have a profile?</div>
+      <div class="lookup-row">
+        <input type="email" id="lookup-email" placeholder="Enter your email to retrieve your ID" />
+        <button class="btn" id="lookup-btn" onclick="lookupProfile()">Look up</button>
+      </div>
+      <div class="toast" id="lookup-toast"></div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Create new profile -->
+    <div class="card">
+      <div class="card-title">Create new profile</div>
+
+      <div class="field">
+        <label>Email <span style="color:var(--text-hint);font-weight:400;text-transform:none;letter-spacing:0;">(used only as identifier)</span></label>
+        <input type="email" id="email" placeholder="your@email.com" />
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Age</label>
+          <input type="number" id="age" placeholder="e.g. 28" min="10" max="100" />
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <select id="gender">
+            <option value="" disabled selected>Select…</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="non_binary">Non-binary</option>
+            <option value="prefer_not">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Height (cm)</label>
+          <input type="number" id="height" placeholder="e.g. 172" min="100" max="230" />
+        </div>
+        <div class="field">
+          <label>Weight (kg)</label>
+          <input type="number" id="weight" placeholder="e.g. 70" min="30" max="250" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Nationality</label>
+        <input type="text" id="nationality" placeholder="e.g. Portuguese" />
+      </div>
+
+      <div class="field">
+        <label>Cold / heat sensitivity (self-reported)</label>
+        <div class="sensitivity-wrap">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:var(--text-secondary);">How sensitive are you to temperature changes?</span>
+            <span class="sensitivity-value" id="sens-lbl">Neutral (0)</span>
+          </div>
+          <input type="range" min="-3" max="3" value="0" step="1" id="sensitivity"
+            oninput="updateSens(this.value)" />
+          <div class="scale-ends">
+            <span>Very cold-sensitive (−3)</span>
+            <span>Very heat-sensitive (+3)</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="create-btn" onclick="createProfile()">Create profile</button>
+      <div class="toast" id="create-toast"></div>
+
+      <div class="id-badge" id="id-badge">
+        <div class="label">Your Participant ID</div>
+        <div class="id-value" id="id-display"></div>
+        <div class="id-note">Save this ID or use your email to retrieve it at any time.</div>
+      </div>
+    </div>
+
+    <a class="nav-link" href="index.html">← Go to survey</a>
+  </div>
+
+  <script>
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJtHFjPsYwTatMtZK6_4Mbb_GrUjIiWKIU3wqDFVlqPiIVLadzxHl34KRgRFol50Wz/exec";
+
+    const sensLabels = ["Very cold-sensitive (−3)", "Cold-sensitive (−2)", "Slightly cold-sensitive (−1)", "Neutral (0)", "Slightly heat-sensitive (+1)", "Heat-sensitive (+2)", "Very heat-sensitive (+3)"];
+
+    function updateSens(v) {
+      document.getElementById("sens-lbl").textContent = sensLabels[parseInt(v) + 3];
+    }
+
+    function generateID() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let id = "P";
+      for (let i = 0; i < 5; i++) id += chars[Math.floor(Math.random() * chars.length)];
+      return id;
+    }
+
+    function jsonpLookup(email, callback) {
+      const cbName = "jsonp_" + Date.now();
+      const script = document.createElement("script");
+      window[cbName] = function(data) {
+        delete window[cbName];
+        document.body.removeChild(script);
+        callback(null, data);
+      };
+      script.onerror = function() {
+        delete window[cbName];
+        document.body.removeChild(script);
+        callback(new Error("Connection error"));
+      };
+      script.src = SHEET_URL + "?email=" + encodeURIComponent(email) + "&callback=" + cbName;
+      document.body.appendChild(script);
+    }
+
+    function lookupProfile() {
+      const email = document.getElementById("lookup-email").value.trim();
+      const toast = document.getElementById("lookup-toast");
+      const btn   = document.getElementById("lookup-btn");
+
+      if (!email) { toast.className = "toast error"; toast.textContent = "Please enter your email."; return; }
+
+      btn.disabled = true; btn.textContent = "Looking up…";
+      toast.className = "toast";
+
+      jsonpLookup(email, function(err, data) {
+        if (err) {
+          toast.className = "toast error";
+          toast.textContent = "Error connecting to the server. Please try again.";
+        } else if (data.found) {
+          toast.className = "toast success";
+          toast.textContent = "Profile found! Your Participant ID is: " + data.participant_id;
+        } else {
+          toast.className = "toast error";
+          toast.textContent = "No profile found for this email. Please create one below.";
+        }
+        btn.disabled = false; btn.textContent = "Look up";
+      });
+    }
+
+    async function createProfile() {
+      const email       = document.getElementById("email").value.trim();
+      const age         = document.getElementById("age").value.trim();
+      const gender      = document.getElementById("gender").value;
+      const height      = document.getElementById("height").value.trim();
+      const weight      = document.getElementById("weight").value.trim();
+      const nationality = document.getElementById("nationality").value.trim();
+      const sensitivity = document.getElementById("sensitivity").value;
+      const toast       = document.getElementById("create-toast");
+      const btn         = document.getElementById("create-btn");
+
+      if (!email || !age || !gender || !height || !weight || !nationality) {
+        toast.className = "toast error";
+        toast.textContent = "Please fill in all fields before creating your profile.";
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        toast.className = "toast error";
+        toast.textContent = "Please enter a valid email address.";
+        return;
+      }
+
+      btn.disabled = true; btn.textContent = "Creating…";
+      toast.className = "toast";
+
+      // Check if email already exists via JSONP
+      jsonpLookup(email, async function(err, existing) {
+        if (!err && existing.found) {
+          toast.className = "toast info";
+          toast.textContent = "A profile with this email already exists. Your ID is: " + existing.participant_id;
+          document.getElementById("id-display").textContent = existing.participant_id;
+          document.getElementById("id-badge").classList.add("visible");
+          btn.disabled = false; btn.textContent = "Create profile";
+          return;
+        }
+
+        const participant_id = generateID();
+        const created_at     = new Date().toISOString();
+
+        try {
+          await fetch(SHEET_URL, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "profile",
+              participant_id, email, age, gender,
+              height_cm: height, weight_kg: weight,
+              nationality, cold_heat_sensitivity: sensitivity,
+              created_at
+            })
+          });
+
+          toast.className = "toast success";
+          toast.textContent = "Profile created successfully!";
+          document.getElementById("id-display").textContent = participant_id;
+          document.getElementById("id-badge").classList.add("visible");
+
+        } catch (e) {
+          toast.className = "toast error";
+          toast.textContent = "Error saving profile. Please try again.";
+        }
+
+        btn.disabled = false; btn.textContent = "Create profile";
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["timestamp", "participant_id", "session", "body_part", "thermal_sensation", "thermal_comfort", "wanted_action"]);
+  }
+
+  const data = JSON.parse(e.postData.contents);
+  data.rows.forEach(row => {
+    sheet.appendRow([row.timestamp, row.participant_id, row.session, row.body_part, row.thermal_sensation, row.thermal_comfort, row.wanted_action]);
+  });
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "ok" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}

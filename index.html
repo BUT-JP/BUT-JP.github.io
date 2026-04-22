@@ -22,8 +22,8 @@
       --tag-limbs-bg: #FAEEDA; --tag-limbs-fg: #633806;
       --success-bg: #EAF3DE; --success-fg: #27500A;
       --error-bg: #FCEBEB; --error-fg: #791F1F;
-      --radius: 10px;
-      --radius-sm: 6px;
+      --info-bg: #E6F1FB; --info-fg: #0C447C;
+      --radius: 10px; --radius-sm: 6px;
     }
 
     body {
@@ -34,255 +34,139 @@
       padding: 2rem 1rem 4rem;
     }
 
-    .page-header {
-      max-width: 680px;
-      margin: 0 auto 2rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1.5rem;
-    }
+    .page-header { max-width: 720px; margin: 0 auto 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+    .page-header h1 { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: -0.3px; margin-bottom: 6px; }
+    .page-header p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
 
-    .page-header h1 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 22px;
-      font-weight: 500;
-      letter-spacing: -0.3px;
-      margin-bottom: 6px;
-    }
+    .scale-legend { max-width: 720px; margin: 0 auto 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+    .scale-legend h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 0.75rem; }
+    .legend-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .legend-item { font-size: 11px; color: var(--text-hint); line-height: 1.4; }
+    .legend-item .val { font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 12px; color: var(--text-primary); display: block; margin-bottom: 2px; }
 
-    .page-header p {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
+    .form-wrap { max-width: 720px; margin: 0 auto; }
 
-    .scale-legend {
-      max-width: 680px;
-      margin: 0 auto 1.5rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-    }
+    .section-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 0.75rem; margin-top: 1.75rem; }
 
-    .scale-legend h3 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      margin-bottom: 0.75rem;
-    }
+    .meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
 
-    .legend-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      text-align: center;
-    }
+    .field label { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); margin-bottom: 6px; font-family: 'IBM Plex Mono', monospace; }
+    .field input[type="text"], .field input[type="email"] { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 14px; font-family: 'IBM Plex Sans', sans-serif; background: var(--surface); color: var(--text-primary); outline: none; transition: border-color 0.15s; }
+    .field input:focus { border-color: var(--accent); }
+    .field input:read-only { background: var(--bg); color: var(--text-secondary); }
 
-    .legend-item {
-      font-size: 11px;
-      color: var(--text-hint);
-      line-height: 1.4;
-    }
+    .email-row { display: flex; gap: 8px; margin-bottom: 4px; }
+    .email-row input { flex: 1; }
 
-    .legend-item .val {
-      font-family: 'IBM Plex Mono', monospace;
-      font-weight: 500;
-      font-size: 12px;
-      color: var(--text-primary);
-      display: block;
-      margin-bottom: 2px;
-    }
+    .btn-lookup { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--surface); color: var(--text-primary); white-space: nowrap; transition: background 0.1s; }
+    .btn-lookup:hover { background: var(--bg); }
+    .btn-lookup:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .form-wrap { max-width: 680px; margin: 0 auto; }
+    .pid-found { display: none; font-size: 12px; padding: 6px 10px; border-radius: var(--radius-sm); font-family: 'IBM Plex Mono', monospace; }
+    .pid-found.success { display: block; background: var(--success-bg); color: var(--success-fg); }
+    .pid-found.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
 
-    .meta-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 1.5rem;
-    }
+    .pid-field { margin-top: 8px; }
 
-    @media (max-width: 480px) {
-      .meta-row { grid-template-columns: 1fr; }
-      .legend-grid { grid-template-columns: repeat(7, 1fr); }
-      .legend-item { font-size: 9px; }
-      .legend-item .val { font-size: 10px; }
-    }
+    .top-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0.5rem; }
 
-    .field label {
-      display: block;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      font-family: 'IBM Plex Mono', monospace;
-    }
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+    .info-card .card-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); margin-bottom: 0.75rem; }
 
-    .field input[type="text"] {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 9px 12px;
-      font-size: 14px;
-      font-family: 'IBM Plex Sans', sans-serif;
-      background: var(--surface);
-      color: var(--text-primary);
-      outline: none;
-      transition: border-color 0.15s;
-    }
+    .clothing-scale { display: flex; flex-direction: column; gap: 6px; }
+    .clothing-option { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 8px; border-radius: var(--radius-sm); transition: background 0.1s; }
+    .clothing-option:hover { background: var(--bg); }
+    .clothing-option input[type="radio"] { display: none; }
+    .radio-dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color 0.1s; }
+    .clothing-option input[type="radio"]:checked + .radio-dot { border-color: var(--accent); background: var(--accent); }
+    .clothing-option input[type="radio"]:checked + .radio-dot::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: white; display: block; }
+    .opt-text { font-size: 13px; color: var(--text-primary); line-height: 1.3; }
+    .opt-sub  { font-size: 11px; color: var(--text-hint); display: block; }
 
-    .field input[type="text"]:focus { border-color: var(--accent); }
+    .other-input { display: none; margin-top: 4px; width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; background: var(--surface); color: var(--text-primary); outline: none; }
+    .other-input:focus { border-color: var(--accent); }
 
-    .body-part-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      margin-bottom: 12px;
-    }
+    .position-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .pos-option { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); transition: border-color 0.1s, background 0.1s; text-align: center; }
+    .pos-option:hover { background: #ECEAE4; }
+    .pos-option input[type="radio"] { display: none; }
+    .pos-option.selected { border-color: var(--accent); background: var(--surface); }
+    .pos-icon  { font-size: 18px; line-height: 1; }
+    .pos-label { font-size: 11px; color: var(--text-secondary); font-family: 'IBM Plex Mono', monospace; line-height: 1.3; }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 1rem;
-    }
+    .body-part-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; }
+    .body-part-card.initial-card { border-color: var(--accent); border-width: 1.5px; }
+    .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
+    .part-title { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; }
+    .section-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tag-back    { background: var(--tag-back-bg);  color: var(--tag-back-fg); }
+    .tag-front   { background: var(--tag-front-bg); color: var(--tag-front-fg); }
+    .tag-head    { background: var(--tag-head-bg);  color: var(--tag-head-fg); }
+    .tag-limbs   { background: var(--tag-limbs-bg); color: var(--tag-limbs-fg); }
+    .tag-initial { background: #F5F3EE; color: #1A1916; border: 1px solid var(--border); }
 
-    .part-title {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .section-tag {
-      font-size: 10px;
-      font-weight: 500;
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-family: 'IBM Plex Mono', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .tag-back  { background: var(--tag-back-bg);  color: var(--tag-back-fg); }
-    .tag-front { background: var(--tag-front-bg); color: var(--tag-front-fg); }
-    .tag-head  { background: var(--tag-head-bg);  color: var(--tag-head-fg); }
-    .tag-limbs { background: var(--tag-limbs-bg); color: var(--tag-limbs-fg); }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    @media (max-width: 560px) {
-      .metrics-grid { grid-template-columns: 1fr; }
-    }
-
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
     .metric-block { display: flex; flex-direction: column; gap: 5px; }
+    .m-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); font-family: 'IBM Plex Mono', monospace; }
+    .m-value { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-primary); min-height: 18px; }
 
-    .metric-block .m-label {
-      font-size: 10px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text-secondary);
-      font-family: 'IBM Plex Mono', monospace;
+    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+    input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+    .scale-ends { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-hint); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+
+    .session-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.25rem;
+      margin-bottom: 0; gap: 12px;
     }
-
-    .metric-block .m-value {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-primary);
-      min-height: 18px;
+    .session-banner.active { border-color: #27500A; background: var(--success-bg); }
+    .session-left { display: flex; align-items: center; gap: 12px; }
+    .session-icon { font-size: 22px; line-height: 1; }
+    .session-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); }
+    .session-banner.active .session-label { color: #27500A; }
+    .session-time { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-hint); margin-top: 2px; }
+    .session-banner.active .session-time { color: #3B6D11; font-weight: 500; }
+    .session-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-start {
+      border: none; border-radius: var(--radius-sm);
+      padding: 9px 16px; font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      background: var(--accent); color: #fff;
+      transition: opacity 0.15s;
     }
+    .btn-start:hover { opacity: 0.85; }
+    .btn-start.started { background: #3B6D11; }
 
-    input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border);
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--surface);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--surface);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-
-    .scale-ends {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      color: var(--text-hint);
-      font-family: 'IBM Plex Mono', monospace;
-      margin-top: 2px;
-    }
-
-    .btn-submit {
-      width: 100%;
-      margin-top: 1.5rem;
-      padding: 13px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-
+    .btn-submit { width: 100%; margin-top: 1.5rem; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
     .btn-submit:hover { opacity: 0.85; }
     .btn-submit:active { transform: scale(0.99); }
     .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .toast {
-      display: none;
-      margin-top: 12px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      text-align: center;
+    .btn-new-response {
+      width: 100%; margin-top: 8px; padding: 13px;
+      background: var(--surface); color: var(--text-primary);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
       font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; font-weight: 500; letter-spacing: 0.04em;
+      cursor: pointer; transition: background 0.15s;
     }
+    .btn-new-response:hover { background: var(--bg); }
+
+    .toast { display: none; margin-top: 12px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; text-align: center; font-family: 'IBM Plex Mono', monospace; }
     .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
     .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
+
+    @media (max-width: 720px) { .top-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .top-grid, .meta-row { grid-template-columns: 1fr; } .metrics-grid { grid-template-columns: 1fr; } .legend-item { font-size: 9px; } }
   </style>
 </head>
 <body>
 
   <div class="page-header">
     <h1>Thermal Comfort Survey</h1>
-    <p>Rate each body region across three dimensions: thermal sensation, thermal comfort, and wanted action. Scale: −3 to +3 (ASHRAE 7-point).</p>
+    <p>Rate each body region across three dimensions: thermal sensation, thermal comfort, and wanted action. Scale: −3 to +3 (ASHRAE 7-point). Decimal values (e.g. 0.5, 1.5) are supported.</p>
   </div>
 
   <div class="scale-legend">
@@ -291,61 +175,291 @@
       <div class="legend-item"><span class="val">−3</span>Cold / Very uncomf. / Much cooler</div>
       <div class="legend-item"><span class="val">−2</span>Cool / Uncomfortable / Cooler</div>
       <div class="legend-item"><span class="val">−1</span>Slightly cool / Slightly uncomf. / Slightly cooler</div>
-      <div class="legend-item"><span class="val">0</span>Neutral / Comfortable / No change</div>
-      <div class="legend-item"><span class="val">+1</span>Slightly warm / Slightly uncomf. / Slightly warmer</div>
-      <div class="legend-item"><span class="val">+2</span>Warm / Uncomfortable / Warmer</div>
-      <div class="legend-item"><span class="val">+3</span>Hot / Very uncomf. / Much warmer</div>
+      <div class="legend-item"><span class="val">0</span>Neutral / - / No change</div>
+      <div class="legend-item"><span class="val">+1</span>Slightly warm / Slightly comf. / Slightly warmer</div>
+      <div class="legend-item"><span class="val">+2</span>Warm / Comfortable / Warmer</div>
+      <div class="legend-item"><span class="val">+3</span>Hot / Very comf. / Much warmer</div>
     </div>
   </div>
 
   <div class="form-wrap">
-    <div class="meta-row">
+
+    <p class="section-title" style="margin-top:0;">Participant</p>
+
+    <div class="field" style="margin-bottom:8px;">
+      <label>Email <span style="color:var(--text-hint);font-weight:400;text-transform:none;letter-spacing:0;">(to load your ID automatically)</span></label>
+      <div class="email-row">
+        <input type="email" id="email" placeholder="your@email.com" />
+        <button class="btn-lookup" id="lookup-btn" onclick="lookupByEmail()">Load ID</button>
+      </div>
+      <div class="pid-found" id="pid-msg"></div>
+      <a href="profile.html" style="display:inline-block;margin-top:8px;font-size:13px;font-weight:500;color:#185FA5;font-family:'IBM Plex Mono',monospace;text-decoration:none;padding:6px 10px;background:#E6F1FB;border-radius:6px;border:1px solid #B5D4F4;" onmouseover="this.style.background='#B5D4F4'" onmouseout="this.style.background='#E6F1FB'">Don't have a profile yet? Create one here →</a>
+    </div>
+
+    <div class="meta-row pid-field">
       <div class="field">
         <label>Participant ID</label>
-        <input type="text" id="pid" placeholder="e.g. P001" />
+        <input type="text" id="pid" placeholder="Auto-filled from email, or type manually" />
       </div>
       <div class="field">
-        <label>Session / Condition</label>
-        <input type="text" id="session" placeholder="e.g. baseline" />
+        <label>Season / Condition</label>
+        <input type="text" id="session" placeholder="e.g. Summer" />
       </div>
     </div>
 
+    <p class="section-title">Context</p>
+    <div class="top-grid">
+
+      <div class="info-card">
+        <div class="card-label">Clothing</div>
+        <div class="clothing-scale">
+          <label class="clothing-option"><input type="radio" name="clothing" value="1_light_summer" /><span class="radio-dot"></span><span class="opt-text">Light summer clothes <span class="opt-sub">clo ≈ 0.5</span></span></label>
+          <label class="clothing-option"><input type="radio" name="clothing" value="2_typical_indoor" /><span class="radio-dot"></span><span class="opt-text">Typical indoor clothes <span class="opt-sub">clo ≈ 1.0</span></span></label>
+          <label class="clothing-option"><input type="radio" name="clothing" value="3_light_jacket" /><span class="radio-dot"></span><span class="opt-text">Smart casual / light jacket <span class="opt-sub">clo ≈ 1.5</span></span></label>
+          <label class="clothing-option"><input type="radio" name="clothing" value="4_winter_coat" /><span class="radio-dot"></span><span class="opt-text">Winter coat + layers <span class="opt-sub">clo ≈ 2.0</span></span></label>
+          <label class="clothing-option"><input type="radio" name="clothing" value="5_heavy_gear" /><span class="radio-dot"></span><span class="opt-text">Heavy cold-weather gear <span class="opt-sub">clo ≈ 2.5+</span></span></label>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-label">Seat position</div>
+        <div class="position-grid">
+          <label class="pos-option" onclick="selectPos(this)"><input type="radio" name="position" value="driver" /><span class="pos-icon">🚗</span><span class="pos-label">Driver</span></label>
+          <label class="pos-option" onclick="selectPos(this)"><input type="radio" name="position" value="front_passenger" /><span class="pos-icon">🪑</span><span class="pos-label">Front passenger</span></label>
+          <label class="pos-option" onclick="selectPos(this)"><input type="radio" name="position" value="rear_left" /><span class="pos-icon">◱</span><span class="pos-label">Rear left</span></label>
+          <label class="pos-option" onclick="selectPos(this)"><input type="radio" name="position" value="rear_center" /><span class="pos-icon">▣</span><span class="pos-label">Rear center</span></label>
+          <label class="pos-option" onclick="selectPos(this)"><input type="radio" name="position" value="rear_right" /><span class="pos-icon">◲</span><span class="pos-label">Rear right</span></label>
+          <label class="pos-option" onclick="selectPos(this)"><input type="radio" name="position" value="other" /><span class="pos-icon">＋</span><span class="pos-label">Other</span></label>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-label">Coming from</div>
+        <div class="clothing-scale">
+          <label class="clothing-option"><input type="radio" name="coming_from" value="street" onchange="toggleOther(false)" /><span class="radio-dot"></span><span class="opt-text">Street / outdoors</span></label>
+          <label class="clothing-option"><input type="radio" name="coming_from" value="home_garage" onchange="toggleOther(false)" /><span class="radio-dot"></span><span class="opt-text">Home garage</span></label>
+          <label class="clothing-option"><input type="radio" name="coming_from" value="office" onchange="toggleOther(false)" /><span class="radio-dot"></span><span class="opt-text">Office / building</span></label>
+          <label class="clothing-option"><input type="radio" name="coming_from" value="parking_lot" onchange="toggleOther(false)" /><span class="radio-dot"></span><span class="opt-text">Parking lot</span></label>
+          <label class="clothing-option"><input type="radio" name="coming_from" value="public_transport" onchange="toggleOther(false)" /><span class="radio-dot"></span><span class="opt-text">Public transport</span></label>
+          <label class="clothing-option"><input type="radio" name="coming_from" value="other" onchange="toggleOther(true)" /><span class="radio-dot"></span><span class="opt-text">Other</span></label>
+          <input type="text" id="coming-from-other" class="other-input" placeholder="Please specify…" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- START SESSION -->
+    <p class="section-title">Session</p>
+    <div class="session-banner" id="session-banner">
+      <div class="session-left">
+        <span class="session-icon">⏱</span>
+        <div>
+          <div class="session-label">Session not started</div>
+          <div class="session-time" id="session-time-display">Press the button when you start the car</div>
+        </div>
+      </div>
+      <div class="session-right">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" id="offset-sec" value="0" min="-300" max="300" style="width:64px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;font-family:'IBM Plex Mono',monospace;background:var(--surface);color:var(--text-primary);outline:none;text-align:center;" title="Offset in seconds (+ if button pressed after ignition, - if before)" />
+          <span style="font-size:11px;color:var(--text-hint);font-family:'IBM Plex Mono',monospace;">sec offset</span>
+        </div>
+        <button class="btn-start" id="start-btn" onclick="startSession()">Start session</button>
+      </div>
+    </div>
+
+    <p class="section-title">Initial state</p>
+    <div class="body-part-card initial-card">
+      <div class="card-header">
+        <span class="part-title">Whole body</span>
+        <span class="section-tag tag-initial">initial state</span>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-block">
+          <span class="m-label">Thermal sensation</span>
+          <span class="m-value" id="initial_sens_lbl">Neutral (0)</span>
+          <input type="range" min="-3" max="3" value="0" step="0.5" id="initial_sens" oninput="updateLabel('initial_sens', sensText)" />
+          <div class="scale-ends"><span>−3</span><span>+3</span></div>
+        </div>
+        <div class="metric-block">
+          <span class="m-label">Thermal comfort</span>
+          <span class="m-value" id="initial_comf_lbl">- (0)</span>
+          <input type="range" min="-3" max="3" value="0" step="0.5" id="initial_comf" oninput="updateLabel('initial_comf', comfText)" />
+          <div class="scale-ends"><span>−3</span><span>+3</span></div>
+        </div>
+        <div class="metric-block">
+          <span class="m-label">Wanted action</span>
+          <span class="m-value" id="initial_act_lbl">No change (0)</span>
+          <input type="range" min="-3" max="3" value="0" step="0.5" id="initial_act" oninput="updateLabel('initial_act', actText)" />
+          <div class="scale-ends"><span>−3</span><span>+3</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title">Body regions</p>
     <div id="parts-container"></div>
 
-    <button class="btn-submit" id="submitBtn" onclick="submitToSheets()">Submit to Google Sheets</button>
+    <p class="section-title">Overall</p>
+    <div class="body-part-card initial-card">
+      <div class="card-header">
+        <span class="part-title">Whole body</span>
+        <span class="section-tag tag-initial">overall</span>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-block">
+          <span class="m-label">Thermal sensation</span>
+          <span class="m-value" id="overall_sens_lbl">Neutral (0)</span>
+          <input type="range" min="-3" max="3" value="0" step="0.5" id="overall_sens" oninput="updateLabel('overall_sens', sensText)" />
+          <div class="scale-ends"><span>−3</span><span>+3</span></div>
+        </div>
+        <div class="metric-block">
+          <span class="m-label">Thermal comfort</span>
+          <span class="m-value" id="overall_comf_lbl">Comfortable (+2)</span>
+          <input type="range" min="-3" max="3" value="2" step="0.5" id="overall_comf" oninput="updateLabel('overall_comf', comfText)" />
+          <div class="scale-ends"><span>−3</span><span>+3</span></div>
+        </div>
+        <div class="metric-block">
+          <span class="m-label">Wanted action</span>
+          <span class="m-value" id="overall_act_lbl">No change (0)</span>
+          <input type="range" min="-3" max="3" value="0" step="0.5" id="overall_act" oninput="updateLabel('overall_act', actText)" />
+          <div class="scale-ends"><span>−3</span><span>+3</span></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="submitToSheets()">Submit</button>
+    <button class="btn-new-response" id="newResponseBtn" onclick="newResponse()" style="display:none;">New response — same session</button>
     <div class="toast" id="toast"></div>
+
   </div>
 
   <script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyJY4TkxVpcrnnoNk4Dx1GRu8P6ImWUZ5spHrtfmrOygIV4ceWhRQqviVWE792gNvuE/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJtHFjPsYwTatMtZK6_4Mbb_GrUjIiWKIU3wqDFVlqPiIVLadzxHl34KRgRFol50Wz/exec";
 
     const bodyParts = [
-      { id: "upper_back",    label: "Upper back",      tag: "back" },
-      { id: "lower_back",    label: "Lower back",      tag: "back" },
-      { id: "seat",          label: "Seat",            tag: "back" },
-      { id: "thighs_back",   label: "Thighs back",     tag: "back" },
-      { id: "face",          label: "Face",            tag: "head" },
-      { id: "head",          label: "Head",            tag: "head" },
-      { id: "chest",         label: "Chest",           tag: "front" },
-      { id: "arms",          label: "Arms",            tag: "limbs" },
-      { id: "hands",         label: "Hands",           tag: "limbs" },
-      { id: "thighs_front",  label: "Thighs front",    tag: "front" },
-      { id: "calves_shins",  label: "Calves + Shins",  tag: "limbs" },
-      { id: "feet",          label: "Feet",            tag: "limbs" }
+      { id: "upper_back",   label: "Upper back",     tag: "back" },
+      { id: "lower_back",   label: "Lower back",     tag: "back" },
+      { id: "seat",         label: "Seat",           tag: "back" },
+      { id: "thighs_back",  label: "Thighs back",    tag: "back" },
+      { id: "face",         label: "Face",           tag: "head" },
+      { id: "head",         label: "Head",           tag: "head" },
+      { id: "chest",        label: "Chest",          tag: "front" },
+      { id: "arms",         label: "Arms",           tag: "limbs" },
+      { id: "hands",        label: "Hands",          tag: "limbs" },
+      { id: "thighs_front", label: "Thighs front",   tag: "front" },
+      { id: "calves_shins", label: "Calves + Shins", tag: "limbs" },
+      { id: "feet",         label: "Feet",           tag: "limbs" }
     ];
 
     const tagLabel = { back: "posterior", front: "anterior", head: "head", limbs: "limbs" };
 
-    const sensLabels  = ["Cold (−3)","Cool (−2)","Slightly cool (−1)","Neutral (0)","Slightly warm (+1)","Warm (+2)","Hot (+3)"];
-    const comfLabels  = ["Very uncomf. (−3)","Uncomfortable (−2)","Slightly uncomf. (−1)","Comfortable (0)","Slightly uncomf. (+1)","Uncomfortable (+2)","Very uncomf. (+3)"];
-    const actLabels   = ["Much cooler (−3)","Cooler (−2)","Slightly cooler (−1)","No change (0)","Slightly warmer (+1)","Warmer (+2)","Much warmer (+3)"];
+    const sensIntLabels = ["Cold","Cool","Slightly cool","Neutral","Slightly warm","Warm","Hot"];
+    const comfIntLabels = ["Very uncomf.","Uncomfortable","Slightly uncomf.","-","Slightly comf.","Comfortable","Very comf."];
+    const actIntLabels  = ["Much cooler","Cooler","Slightly cooler","No change","Slightly warmer","Warmer","Much warmer"];
 
-    const sensText = v => sensLabels[parseInt(v)+3];
-    const comfText = v => comfLabels[parseInt(v)+3];
-    const actText  = v => actLabels[parseInt(v)+3];
+    function formatVal(n) { return n % 1 === 0 ? (n > 0 ? "+" + n : String(n)) : (n > 0 ? "+" + n.toFixed(1) : n.toFixed(1)); }
+    function sensText(v) { const n = parseFloat(v); return n % 1 === 0 ? sensIntLabels[n+3] + " (" + formatVal(n) + ")" : formatVal(n); }
+    function comfText(v) { const n = parseFloat(v); return n % 1 === 0 ? comfIntLabels[n+3] + " (" + formatVal(n) + ")" : formatVal(n); }
+    function actText(v)  { const n = parseFloat(v); return n % 1 === 0 ? actIntLabels[n+3]  + " (" + formatVal(n) + ")" : formatVal(n); }
 
+    function updateLabel(id, textFn) {
+      document.getElementById(id + "_lbl").textContent = textFn(document.getElementById(id).value);
+    }
+
+    let ignitionTime = null;
+
+    function startSession() {
+      const offset  = parseInt(document.getElementById("offset-sec").value) || 0;
+      const now     = new Date();
+      ignitionTime  = new Date(now.getTime() - offset * 1000);
+
+      const banner  = document.getElementById("session-banner");
+      const display = document.getElementById("session-time-display");
+      const btn     = document.getElementById("start-btn");
+
+      banner.classList.add("active");
+      btn.classList.add("started");
+      btn.textContent = "Restart";
+
+      const fmt = ignitionTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      display.textContent = "Started at " + fmt + (offset !== 0 ? " (offset: " + (offset > 0 ? "+" : "") + offset + "s)" : "");
+    }
+
+    function newResponse() {
+      // Reset only sliders — keep participant, session, context and ignition_time
+
+      // Reset initial state to 0
+      document.getElementById("initial_sens").value = 0; document.getElementById("initial_sens_lbl").textContent = "Neutral (0)";
+      document.getElementById("initial_comf").value = 0; document.getElementById("initial_comf_lbl").textContent = "- (0)";
+      document.getElementById("initial_act").value  = 0; document.getElementById("initial_act_lbl").textContent  = "No change (0)";
+
+      // Reset body parts — comfort back to +2
+      bodyParts.forEach(p => {
+        document.getElementById(p.id + "_sens").value = 0; document.getElementById(p.id + "_sens_lbl").textContent = "Neutral (0)";
+        document.getElementById(p.id + "_comf").value = 2; document.getElementById(p.id + "_comf_lbl").textContent = "Comfortable (+2)";
+        document.getElementById(p.id + "_act").value  = 0; document.getElementById(p.id + "_act_lbl").textContent  = "No change (0)";
+      });
+
+      // Reset overall
+      document.getElementById("overall_sens").value = 0; document.getElementById("overall_sens_lbl").textContent = "Neutral (0)";
+      document.getElementById("overall_comf").value = 2; document.getElementById("overall_comf_lbl").textContent = "Comfortable (+2)";
+      document.getElementById("overall_act").value  = 0; document.getElementById("overall_act_lbl").textContent  = "No change (0)";
+
+      // Hide new response button and toast, scroll to top
+      document.getElementById("newResponseBtn").style.display = "none";
+      document.getElementById("toast").className = "toast";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function toggleOther(show) {
+      document.getElementById("coming-from-other").style.display = show ? "block" : "none";
+    }
+
+    function selectPos(el) {
+      document.querySelectorAll(".pos-option").forEach(o => o.classList.remove("selected"));
+      el.classList.add("selected");
+    }
+
+    function lookupByEmail() {
+      const email = document.getElementById("email").value.trim();
+      const msg   = document.getElementById("pid-msg");
+      const btn   = document.getElementById("lookup-btn");
+
+      if (!email) { msg.className = "pid-found error"; msg.textContent = "Enter your email first."; return; }
+
+      btn.disabled = true; btn.textContent = "Loading…";
+      msg.className = "pid-found";
+
+      const cbName = "jsonp_" + Date.now();
+      const script = document.createElement("script");
+
+      window[cbName] = function(data) {
+        delete window[cbName];
+        document.body.removeChild(script);
+        if (data.found) {
+          document.getElementById("pid").value = data.participant_id;
+          msg.className = "pid-found success";
+          msg.textContent = "Profile found — ID loaded: " + data.participant_id;
+        } else {
+          msg.className = "pid-found error";
+          msg.textContent = "No profile found. Create one using the link below.";
+        }
+        btn.disabled = false; btn.textContent = "Load ID";
+      };
+
+      script.onerror = function() {
+        delete window[cbName];
+        document.body.removeChild(script);
+        msg.className = "pid-found error";
+        msg.textContent = "Connection error. You can type your ID manually.";
+        btn.disabled = false; btn.textContent = "Load ID";
+      };
+
+      script.src = SHEET_URL + "?email=" + encodeURIComponent(email) + "&callback=" + cbName;
+      document.body.appendChild(script);
+    }
+
+    // Build body region cards — thermal comfort starts at +2
     const container = document.getElementById("parts-container");
-
     bodyParts.forEach(part => {
       const card = document.createElement("div");
       card.className = "body-part-card";
@@ -358,22 +472,22 @@
           <div class="metric-block">
             <span class="m-label">Thermal sensation</span>
             <span class="m-value" id="${part.id}_sens_lbl">Neutral (0)</span>
-            <input type="range" min="-3" max="3" value="0" step="1" id="${part.id}_sens"
-              oninput="document.getElementById('${part.id}_sens_lbl').textContent = sensText(this.value)" />
+            <input type="range" min="-3" max="3" value="0" step="0.5" id="${part.id}_sens"
+              oninput="updateLabel('${part.id}_sens', sensText)" />
             <div class="scale-ends"><span>−3</span><span>+3</span></div>
           </div>
           <div class="metric-block">
             <span class="m-label">Thermal comfort</span>
-            <span class="m-value" id="${part.id}_comf_lbl">Comfortable (0)</span>
-            <input type="range" min="-3" max="3" value="0" step="1" id="${part.id}_comf"
-              oninput="document.getElementById('${part.id}_comf_lbl').textContent = comfText(this.value)" />
+            <span class="m-value" id="${part.id}_comf_lbl">Comfortable (+2)</span>
+            <input type="range" min="-3" max="3" value="2" step="0.5" id="${part.id}_comf"
+              oninput="updateLabel('${part.id}_comf', comfText)" />
             <div class="scale-ends"><span>−3</span><span>+3</span></div>
           </div>
           <div class="metric-block">
             <span class="m-label">Wanted action</span>
             <span class="m-value" id="${part.id}_act_lbl">No change (0)</span>
-            <input type="range" min="-3" max="3" value="0" step="1" id="${part.id}_act"
-              oninput="document.getElementById('${part.id}_act_lbl').textContent = actText(this.value)" />
+            <input type="range" min="-3" max="3" value="0" step="0.5" id="${part.id}_act"
+              oninput="updateLabel('${part.id}_act', actText)" />
             <div class="scale-ends"><span>−3</span><span>+3</span></div>
           </div>
         </div>
@@ -382,55 +496,84 @@
     });
 
     async function submitToSheets() {
-      const pid     = document.getElementById("pid").value.trim() || "unknown";
-      const session = document.getElementById("session").value.trim() || "";
-      const ts      = new Date().toISOString();
-      const btn     = document.getElementById("submitBtn");
-      const toast   = document.getElementById("toast");
+      const pid        = document.getElementById("pid").value.trim() || "unknown";
+      const session    = document.getElementById("session").value.trim() || "";
+      const ts         = new Date().toISOString();
+      const clothing   = (document.querySelector('input[name="clothing"]:checked') || {}).value || "";
+      const position   = (document.querySelector('input[name="position"]:checked') || {}).value || "";
+      const cfRadio    = document.querySelector('input[name="coming_from"]:checked');
+      const comingFrom = cfRadio ? (cfRadio.value === "other" ? (document.getElementById("coming-from-other").value.trim() || "other") : cfRadio.value) : "";
+      const btn        = document.getElementById("submitBtn");
+      const toast      = document.getElementById("toast");
 
-      const rows = bodyParts.map(part => ({
-        timestamp:         ts,
-        participant_id:    pid,
-        session:           session,
-        body_part:         part.label,
-        thermal_sensation: parseInt(document.getElementById(part.id + "_sens").value),
-        thermal_comfort:   parseInt(document.getElementById(part.id + "_comf").value),
-        wanted_action:     parseInt(document.getElementById(part.id + "_act").value)
-      }));
+      const ignition_time = ignitionTime ? ignitionTime.toISOString() : "";
 
-      btn.disabled    = true;
-      btn.textContent = "Sending…";
-      toast.className = "toast";
-      toast.textContent = "";
+      const rows = [
+        {
+          timestamp: ts, participant_id: pid, season: session, clothing, position, coming_from: comingFrom,
+          ignition_time,
+          body_part: "Whole body (initial)",
+          thermal_sensation: parseFloat(document.getElementById("initial_sens").value),
+          thermal_comfort:   parseFloat(document.getElementById("initial_comf").value),
+          wanted_action:     parseFloat(document.getElementById("initial_act").value)
+        },
+        ...bodyParts.map(part => ({
+          timestamp: ts, participant_id: pid, season: session, clothing, position, coming_from: comingFrom,
+          ignition_time,
+          body_part: part.label,
+          thermal_sensation: parseFloat(document.getElementById(part.id + "_sens").value),
+          thermal_comfort:   parseFloat(document.getElementById(part.id + "_comf").value),
+          wanted_action:     parseFloat(document.getElementById(part.id + "_act").value)
+        })),
+        {
+          timestamp: ts, participant_id: pid, season: session, clothing, position, coming_from: comingFrom,
+          ignition_time,
+          body_part: "Whole body (overall)",
+          thermal_sensation: parseFloat(document.getElementById("overall_sens").value),
+          thermal_comfort:   parseFloat(document.getElementById("overall_comf").value),
+          wanted_action:     parseFloat(document.getElementById("overall_act").value)
+        }
+      ];
+
+      btn.disabled = true; btn.textContent = "Sending…";
+      toast.className = "toast"; toast.textContent = "";
 
       try {
         await fetch(SHEET_URL, {
-          method: "POST",
-          mode: "no-cors",
+          method: "POST", mode: "no-cors",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rows })
         });
 
         toast.className   = "toast success";
-        toast.textContent = "Submitted successfully — data sent to Google Sheets.";
-        btn.textContent   = "Submit again";
+        toast.textContent = "Submitted! Press 'New response' to fill again with the same session context.";
+        btn.textContent   = "Submit";
 
-        bodyParts.forEach(part => {
-          ["sens","comf","act"].forEach(m => {
-            document.getElementById(`${part.id}_${m}`).value = 0;
-          });
-          document.getElementById(`${part.id}_sens_lbl`).textContent = "Neutral (0)";
-          document.getElementById(`${part.id}_comf_lbl`).textContent = "Comfortable (0)";
-          document.getElementById(`${part.id}_act_lbl`).textContent  = "No change (0)";
+        // Show new response button
+        document.getElementById("newResponseBtn").style.display = "block";
+
+        // Reset only sliders — keep participant, context and ignition_time
+        // Reset initial state to 0
+        document.getElementById("initial_sens").value = 0; document.getElementById("initial_sens_lbl").textContent = "Neutral (0)";
+        document.getElementById("initial_comf").value = 0; document.getElementById("initial_comf_lbl").textContent = "- (0)";
+        document.getElementById("initial_act").value  = 0; document.getElementById("initial_act_lbl").textContent  = "No change (0)";
+
+        // Reset body parts — comfort back to +2
+        bodyParts.forEach(p => {
+          document.getElementById(p.id + "_sens").value = 0; document.getElementById(p.id + "_sens_lbl").textContent = "Neutral (0)";
+          document.getElementById(p.id + "_comf").value = 2; document.getElementById(p.id + "_comf_lbl").textContent = "Comfortable (+2)";
+          document.getElementById(p.id + "_act").value  = 0; document.getElementById(p.id + "_act_lbl").textContent  = "No change (0)";
         });
 
-        document.getElementById("pid").value     = "";
-        document.getElementById("session").value = "";
+        // Reset overall
+        document.getElementById("overall_sens").value = 0; document.getElementById("overall_sens_lbl").textContent = "Neutral (0)";
+        document.getElementById("overall_comf").value = 2; document.getElementById("overall_comf_lbl").textContent = "Comfortable (+2)";
+        document.getElementById("overall_act").value  = 0; document.getElementById("overall_act_lbl").textContent  = "No change (0)";
 
       } catch (err) {
         toast.className   = "toast error";
         toast.textContent = "Error sending data. Check the Apps Script URL and try again.";
-        btn.textContent   = "Submit to Google Sheets";
+        btn.textContent   = "Submit";
       }
 
       btn.disabled = false;
