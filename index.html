@@ -160,6 +160,11 @@
 
     @media (max-width: 720px) { .top-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 560px) { .top-grid, .meta-row { grid-template-columns: 1fr; } .metrics-grid { grid-template-columns: 1fr; } .legend-item { font-size: 9px; } }
+
+    .tab-bar { max-width: 720px; margin: 0 auto 2rem; display: flex; border-bottom: 2px solid var(--border); }
+    .tab-link { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-secondary); padding: 10px 18px; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; letter-spacing: 0.04em; }
+    .tab-link:hover { color: var(--text-primary); }
+    .tab-link.active { color: var(--text-primary); border-bottom-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -169,6 +174,11 @@
     <p>Rate each body region across three dimensions: thermal sensation, thermal comfort, and wanted action. Scale: −3 to +3 (ASHRAE 7-point). Decimal values (e.g. 0.5, 1.5) are supported.</p>
   </div>
 
+  
+  <div class="tab-bar">
+    <a href="hvac_controls.html" class="tab-link">HVAC Controls Log</a>
+    <a href="index.html" class="tab-link active">Thermal Comfort Survey</a>
+  </div>
   <div class="scale-legend">
     <h3>Scale reference</h3>
     <div class="legend-grid">
@@ -326,6 +336,10 @@
       </div>
     </div>
 
+    <label style="display:flex;align-items:center;gap:8px;margin-top:1.5rem;font-size:13px;color:var(--text-secondary);font-family:'IBM Plex Mono',monospace;cursor:pointer;">
+      <input type="checkbox" id="prefill-checkbox" style="width:15px;height:15px;cursor:pointer;" />
+      Pre-fill next response with current values
+    </label>
     <button class="btn-submit" id="submitBtn" onclick="submitToSheets()">Submit</button>
     <button class="btn-new-response" id="newResponseBtn" onclick="newResponse()" style="display:none;">New response — same session</button>
     <div class="toast" id="toast"></div>
@@ -333,7 +347,7 @@
   </div>
 
   <script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbw4TPPG6F0WBH3aeRWpgz2b2x385r-uE5IOVT7xRkmhR92xy4GpNiRzYheJFZz2_pbFdA/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJtHFjPsYwTatMtZK6_4Mbb_GrUjIiWKIU3wqDFVlqPiIVLadzxHl34KRgRFol50Wz/exec";
 
     const bodyParts = [
       { id: "upper_back",   label: "Upper back",     tag: "back" },
@@ -366,46 +380,55 @@
     }
 
     let ignitionTime = null;
+    let lastValues   = {};
+    let elapsedTimer = null;
 
-    function startSession() {
-      const offset  = parseInt(document.getElementById("offset-sec").value) || 0;
-      const now     = new Date();
-      ignitionTime  = new Date(now.getTime() - offset * 1000);
-
+    function applySession(isoString) {
+      ignitionTime = new Date(isoString);
       const banner  = document.getElementById("session-banner");
       const display = document.getElementById("session-time-display");
       const btn     = document.getElementById("start-btn");
-
       banner.classList.add("active");
       btn.classList.add("started");
       btn.textContent = "Restart";
-
       const fmt = ignitionTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-      display.textContent = "Started at " + fmt + (offset !== 0 ? " (offset: " + (offset > 0 ? "+" : "") + offset + "s)" : "");
+      function tick() {
+        const s = Math.floor((Date.now() - ignitionTime.getTime()) / 1000);
+        display.textContent = "Started at " + fmt + " ? " + Math.floor(s/60) + "m " + String(s%60).padStart(2,"0") + "s elapsed";
+      }
+      if (elapsedTimer) clearInterval(elapsedTimer);
+      elapsedTimer = setInterval(tick, 1000);
+      tick();
     }
 
+    function startSession() {
+      const offset = parseInt(document.getElementById("offset-sec").value) || 0;
+      const iso    = new Date(Date.now() - offset * 1000).toISOString();
+      localStorage.setItem("hvac_ignition_time", iso);
+      applySession(iso);
+    }
+
+    // Restore session if already started on the other page
+    (function() {
+      const stored = localStorage.getItem("hvac_ignition_time");
+      if (stored) applySession(stored);
+    })();
+
     function newResponse() {
-      // Reset only sliders — keep participant, session, context and ignition_time
+      const prefill = document.getElementById("prefill-checkbox").checked;
 
-      // Reset initial state to 0
-      document.getElementById("initial_sens").value = 0; document.getElementById("initial_sens_lbl").textContent = "Neutral (0)";
-      document.getElementById("initial_comf").value = 0; document.getElementById("initial_comf_lbl").textContent = "- (0)";
-      document.getElementById("initial_act").value  = 0; document.getElementById("initial_act_lbl").textContent  = "No change (0)";
+      const defaults = { initial: { sens: 0, comf: 0, act: 0 }, overall: { sens: 0, comf: 2, act: 0 } };
+      bodyParts.forEach(p => { defaults[p.id] = { sens: 0, comf: 2, act: 0 }; });
 
-      // Reset body parts — comfort back to +2
-      bodyParts.forEach(p => {
-        document.getElementById(p.id + "_sens").value = 0; document.getElementById(p.id + "_sens_lbl").textContent = "Neutral (0)";
-        document.getElementById(p.id + "_comf").value = 2; document.getElementById(p.id + "_comf_lbl").textContent = "Comfortable (+2)";
-        document.getElementById(p.id + "_act").value  = 0; document.getElementById(p.id + "_act_lbl").textContent  = "No change (0)";
+      ["initial", ...bodyParts.map(p => p.id), "overall"].forEach(id => {
+        const vals = prefill && lastValues[id] ? lastValues[id] : defaults[id];
+        document.getElementById(id + "_sens").value = vals.sens; updateLabel(id + "_sens", sensText);
+        document.getElementById(id + "_comf").value = vals.comf; updateLabel(id + "_comf", comfText);
+        document.getElementById(id + "_act").value  = vals.act;  updateLabel(id + "_act",  actText);
       });
 
-      // Reset overall
-      document.getElementById("overall_sens").value = 0; document.getElementById("overall_sens_lbl").textContent = "Neutral (0)";
-      document.getElementById("overall_comf").value = 2; document.getElementById("overall_comf_lbl").textContent = "Comfortable (+2)";
-      document.getElementById("overall_act").value  = 0; document.getElementById("overall_act_lbl").textContent  = "No change (0)";
-
-      // Hide new response button and toast, scroll to top
       document.getElementById("newResponseBtn").style.display = "none";
+      document.getElementById("prefill-checkbox").checked = false;
       document.getElementById("toast").className = "toast";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -549,23 +572,30 @@
         toast.textContent = "Submitted! Press 'New response' to fill again with the same session context.";
         btn.textContent   = "Submit";
 
-        // Show new response button
+        // Show post-submit options (checkbox + new response button)
         document.getElementById("newResponseBtn").style.display = "block";
 
-        // Reset only sliders — keep participant, context and ignition_time
-        // Reset initial state to 0
+        // Save current slider values for prefill before resetting
+        lastValues = {};
+        ["initial", ...bodyParts.map(p => p.id), "overall"].forEach(id => {
+          lastValues[id] = {
+            sens: parseFloat(document.getElementById(id + "_sens").value),
+            comf: parseFloat(document.getElementById(id + "_comf").value),
+            act:  parseFloat(document.getElementById(id + "_act").value)
+          };
+        });
+
+        // Reset sliders to defaults
         document.getElementById("initial_sens").value = 0; document.getElementById("initial_sens_lbl").textContent = "Neutral (0)";
         document.getElementById("initial_comf").value = 0; document.getElementById("initial_comf_lbl").textContent = "- (0)";
         document.getElementById("initial_act").value  = 0; document.getElementById("initial_act_lbl").textContent  = "No change (0)";
 
-        // Reset body parts — comfort back to +2
         bodyParts.forEach(p => {
           document.getElementById(p.id + "_sens").value = 0; document.getElementById(p.id + "_sens_lbl").textContent = "Neutral (0)";
           document.getElementById(p.id + "_comf").value = 2; document.getElementById(p.id + "_comf_lbl").textContent = "Comfortable (+2)";
           document.getElementById(p.id + "_act").value  = 0; document.getElementById(p.id + "_act_lbl").textContent  = "No change (0)";
         });
 
-        // Reset overall
         document.getElementById("overall_sens").value = 0; document.getElementById("overall_sens_lbl").textContent = "Neutral (0)";
         document.getElementById("overall_comf").value = 2; document.getElementById("overall_comf_lbl").textContent = "Comfortable (+2)";
         document.getElementById("overall_act").value  = 0; document.getElementById("overall_act_lbl").textContent  = "No change (0)";

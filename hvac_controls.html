@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HVAC Controls Log</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F3EE;
+      --surface: #FFFFFF;
+      --border: #DDDBD4;
+      --text-primary: #1A1916;
+      --text-secondary: #6B6860;
+      --text-hint: #A8A59E;
+      --accent: #1A1916;
+      --success-bg: #EAF3DE; --success-fg: #27500A;
+      --error-bg: #FCEBEB;   --error-fg: #791F1F;
+      --info-bg: #E6F1FB;    --info-fg: #0C447C;
+      --radius: 10px; --radius-sm: 6px;
+      --tag-vent-bg: #E6F1FB; --tag-vent-fg: #0C447C;
+      --tag-heat-bg: #FAEEDA; --tag-heat-fg: #633806;
+      --tag-flow-bg: #EAF3DE; --tag-flow-fg: #27500A;
+      --tag-src-bg: #EEEDFE;  --tag-src-fg: #3C3489;
+    }
+
+    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; padding: 2rem 1rem 4rem; }
+
+    .page-header { max-width: 720px; margin: 0 auto 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+    .page-header h1 { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: -0.3px; margin-bottom: 6px; }
+    .page-header p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    .tab-bar { max-width: 720px; margin: 0 auto 2rem; display: flex; border-bottom: 2px solid var(--border); }
+    .tab-link { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-secondary); padding: 10px 18px; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; letter-spacing: 0.04em; }
+    .tab-link:hover { color: var(--text-primary); }
+    .tab-link.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+
+    .form-wrap { max-width: 720px; margin: 0 auto; }
+    .section-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+    .section-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-hint); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 6px; }
+
+    .session-banner { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; gap: 12px; }
+    .session-banner.active { border-color: #27500A; background: var(--success-bg); }
+    .session-left { display: flex; align-items: center; gap: 12px; }
+    .session-icon { font-size: 22px; line-height: 1; }
+    .session-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); }
+    .session-banner.active .session-label { color: #27500A; }
+    .session-time { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-hint); margin-top: 2px; }
+    .session-banner.active .session-time { color: #3B6D11; font-weight: 500; }
+    .session-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-start { border: none; border-radius: var(--radius-sm); padding: 9px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--accent); color: #fff; transition: opacity 0.15s; }
+    .btn-start:hover { opacity: 0.85; }
+    .btn-start.started { background: #3B6D11; }
+
+    .control-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; }
+    .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
+    .card-title { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; }
+    .section-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tag-vent { background: var(--tag-vent-bg); color: var(--tag-vent-fg); }
+    .tag-heat { background: var(--tag-heat-bg); color: var(--tag-heat-fg); }
+    .tag-flow { background: var(--tag-flow-bg); color: var(--tag-flow-fg); }
+    .tag-src  { background: var(--tag-src-bg);  color: var(--tag-src-fg); }
+
+    /* Compass */
+    .vent-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .vent-zone { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: var(--bg); }
+    .vent-zone-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); margin-bottom: 10px; }
+    .dir-compass { display: grid; grid-template-columns: repeat(3, 34px); grid-template-rows: repeat(3, 34px); gap: 3px; justify-content: center; margin: 0 auto; }
+    .dir-btn { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.1s, background 0.1s; user-select: none; }
+    .dir-btn:hover { background: #ECEAE4; }
+    .dir-btn.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .dir-btn.center-dot { border: 1px dashed var(--border); color: var(--text-hint); font-size: 16px; }
+    .dir-btn.center-dot.selected { border-style: solid; border-color: var(--accent); background: var(--accent); color: #fff; }
+    .dir-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-hint); text-align: center; margin-top: 6px; min-height: 14px; }
+
+    /* Source */
+    .source-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .source-option { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 12px 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); transition: border-color 0.1s, background 0.1s; text-align: center; }
+    .source-option:hover { background: #ECEAE4; }
+    .source-option.selected { border-color: var(--accent); background: var(--surface); }
+    .source-icon { font-size: 20px; line-height: 1; }
+    .source-label { font-size: 10px; color: var(--text-secondary); font-family: 'IBM Plex Mono', monospace; line-height: 1.4; }
+
+    /* Toggle rows */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-label { font-size: 13px; color: var(--text-primary); flex-shrink: 0; max-width: 50%; }
+    .toggle-sub { font-size: 11px; color: var(--text-hint); font-family: 'IBM Plex Mono', monospace; display: block; }
+
+    /* Standard pills */
+    .level-pills { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .level-pill { padding: 5px 11px; border: 1px solid var(--border); border-radius: 99px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; background: var(--surface); color: var(--text-secondary); transition: all 0.1s; white-space: nowrap; }
+    .level-pill:hover { background: #ECEAE4; }
+    .level-pill.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .level-pill.warm.selected { border-color: #B85C00; background: #B85C00; color: #fff; }
+
+    /* Seat climate pills — heat/off/cool in one row */
+    .seat-climate-pills { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .seat-pill { padding: 5px 9px; border: 1px solid var(--border); border-radius: 99px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; background: var(--surface); color: var(--text-secondary); transition: all 0.1s; white-space: nowrap; }
+    .seat-pill:hover { background: #ECEAE4; }
+    .seat-pill.sel-cool { border-color: #0C447C; background: #0C447C; color: #fff; }
+    .seat-pill.sel-off  { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .seat-pill.sel-heat { border-color: #B85C00; background: #B85C00; color: #fff; }
+    .seat-divider { width: 1px; height: 18px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+
+    /* Intensity */
+    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+    input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+    .intensity-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .tick-row { display: flex; justify-content: space-between; padding: 0 2px; margin-top: 3px; }
+    .tick-row span { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text-hint); }
+
+    .elapsed-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 3px 8px; border-radius: 99px; background: var(--info-bg); color: var(--info-fg); border: 1px solid #B5D4F4; margin-left: 8px; vertical-align: middle; }
+
+    /* Summary */
+    .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+    .summary-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; }
+    .s-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-hint); }
+    .s-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-primary); margin-top: 2px; }
+
+    .btn-submit { width: 100%; margin-top: 1.5rem; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+    .btn-submit:hover { opacity: 0.85; }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-new-response { width: 100%; margin-top: 8px; padding: 13px; background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s; }
+    .btn-new-response:hover { background: var(--bg); }
+    .toast { display: none; margin-top: 12px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; text-align: center; font-family: 'IBM Plex Mono', monospace; }
+    .toast.success { display: block; background: var(--success-bg); color: var(--success-fg); }
+    .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
+
+    @media (max-width: 560px) {
+      .vent-layout { grid-template-columns: 1fr; }
+      .source-grid { grid-template-columns: repeat(3, 1fr); }
+      .toggle-label { max-width: 40%; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>HVAC Controls Log</h1>
+    <p>Manually record the vehicle's HVAC settings at the time of the survey — vent directions, seat climate, airflow intensity and source.</p>
+  </div>
+
+  <div class="tab-bar">
+    <a href="hvac_controls.html" class="tab-link active">HVAC Controls Log</a>
+    <a href="index.html" class="tab-link">Thermal Comfort Survey</a>
+  </div>
+
+  <div class="form-wrap">
+
+    <p class="section-title" style="margin-top:0;">Session</p>
+    <div class="session-banner" id="session-banner">
+      <div class="session-left">
+        <span class="session-icon">⏱</span>
+        <div>
+          <div class="session-label">Session not started</div>
+          <div class="session-time" id="session-time-display">Press the button when you start the car</div>
+        </div>
+      </div>
+      <div class="session-right">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" id="offset-sec" value="0" min="-300" max="300"
+            style="width:64px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;font-family:'IBM Plex Mono',monospace;background:var(--surface);color:var(--text-primary);outline:none;text-align:center;" />
+          <span style="font-size:11px;color:var(--text-hint);font-family:'IBM Plex Mono',monospace;">sec offset</span>
+        </div>
+        <button class="btn-start" id="start-btn" onclick="startSession()">Start session</button>
+      </div>
+    </div>
+
+    <!-- VENT DIRECTION -->
+    <p class="section-title" style="margin-top:1.75rem;">
+      Vent direction
+      <span class="section-hint">tap the arrow pointing where each vent is aimed</span>
+    </p>
+    <div class="control-card">
+      <div class="card-header">
+        <span class="card-title">Airflow direction — 4 vents</span>
+        <span class="section-tag tag-vent">direction</span>
+      </div>
+      <div class="vent-layout">
+        <div class="vent-zone">
+          <div class="vent-zone-label">Driver vent</div>
+          <div class="dir-compass" id="compass-driver"></div>
+          <div class="dir-label" id="dir-driver-label">—</div>
+        </div>
+        <div class="vent-zone">
+          <div class="vent-zone-label">Co-driver vent</div>
+          <div class="dir-compass" id="compass-passenger"></div>
+          <div class="dir-label" id="dir-passenger-label">—</div>
+        </div>
+        <div class="vent-zone">
+          <div class="vent-zone-label">Driver dashboard vent</div>
+          <div class="dir-compass" id="compass-rear-left"></div>
+          <div class="dir-label" id="dir-rear-left-label">—</div>
+        </div>
+        <div class="vent-zone">
+          <div class="vent-zone-label">Co-driver dashboard vent</div>
+          <div class="dir-compass" id="compass-rear-right"></div>
+          <div class="dir-label" id="dir-rear-right-label">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AIRFLOW SOURCE -->
+    <p class="section-title">
+      Airflow source
+      <span class="section-hint">select all that apply</span>
+    </p>
+    <div class="control-card">
+      <div class="card-header">
+        <span class="card-title">Where is air coming from?</span>
+        <span class="section-tag tag-src">source</span>
+      </div>
+      <div class="source-grid">
+        <div class="source-option" id="src-dashboard" onclick="toggleSource(this, 'dashboard')">
+          <span class="source-icon">💨</span>
+          <span class="source-label">Dashboard</span>
+        </div>
+        <div class="source-option" id="src-feet" onclick="toggleSource(this, 'feet')">
+          <span class="source-icon">🦶</span>
+          <span class="source-label">Feet / floor</span>
+        </div>
+        <div class="source-option" id="src-torso" onclick="toggleSource(this, 'torso')">
+          <span class="source-icon">👕</span>
+          <span class="source-label">Torso / chest</span>
+        </div>
+        <div class="source-option" id="src-windshield" onclick="toggleSource(this, 'windshield_defroster')">
+          <span class="source-icon">🪟</span>
+          <span class="source-label">Windshield defroster</span>
+        </div>
+        <div class="source-option" id="src-rear" onclick="toggleSource(this, 'rear_defroster')">
+          <span class="source-icon">🔲</span>
+          <span class="source-label">Rear defroster</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AIRFLOW INTENSITY -->
+    <p class="section-title">Airflow intensity</p>
+    <div class="control-card">
+      <div class="card-header" style="margin-bottom:0.75rem;">
+        <span class="card-title">Fan speed</span>
+        <span class="section-tag tag-flow">intensity</span>
+        <span class="intensity-val" id="intensity-val" style="margin-left:auto;">0 — Off</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-hint);">Off</span>
+        <input type="range" min="0" max="8" value="0" step="1" id="intensity-slider" oninput="updateIntensity()" style="flex:1;" />
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-hint);">Max</span>
+      </div>
+      <div class="tick-row"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+    </div>
+
+    <!-- STEERING WHEEL -->
+    <p class="section-title">Steering wheel heating</p>
+    <div class="control-card">
+      <div class="card-header"><span class="card-title">Steering wheel</span><span class="section-tag tag-heat">heating</span></div>
+      <div class="toggle-row" style="border-bottom:none;padding-bottom:0;">
+        <span class="toggle-label">Status</span>
+        <div class="level-pills">
+          <div class="level-pill selected" data-group="sw-heat" data-val="off" onclick="selectPill(this)">Off</div>
+          <div class="level-pill warm" data-group="sw-heat" data-val="on" onclick="selectPill(this)">🔥 On</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEAT CLIMATE CONTROL -->
+    <p class="section-title">
+      Seat climate control
+      <span class="section-hint">internal element — heating or cooling</span>
+    </p>
+    <div class="control-card">
+      <div class="card-header"><span class="card-title">Driver seat</span><span class="section-tag tag-heat">seat climate</span></div>
+      <div class="toggle-row" style="border-bottom:none;padding-bottom:0;">
+        <span class="toggle-label">Level</span>
+        <div class="seat-climate-pills" id="driver-seat-pills"></div>
+      </div>
+    </div>
+    <div class="control-card">
+      <div class="card-header"><span class="card-title">Co-driver seat</span><span class="section-tag tag-heat">seat climate</span></div>
+      <div class="toggle-row" style="border-bottom:none;padding-bottom:0;">
+        <span class="toggle-label">Level</span>
+        <div class="seat-climate-pills" id="codriver-seat-pills"></div>
+      </div>
+    </div>
+
+    <!-- A/C -->
+    <p class="section-title">A/C settings</p>
+    <div class="control-card">
+      <div class="card-header"><span class="card-title">Air conditioning</span><span class="section-tag tag-flow">a/c</span></div>
+      <div class="toggle-row">
+        <span class="toggle-label">A/C compressor</span>
+        <div class="level-pills">
+          <div class="level-pill selected" data-group="ac-compressor" data-val="off" onclick="selectPill(this)">Off</div>
+          <div class="level-pill" data-group="ac-compressor" data-val="on" onclick="selectPill(this)">On</div>
+        </div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Air recirculation<span class="toggle-sub">fresh = outside air / recirc = cabin air only</span></span>
+        <div class="level-pills">
+          <div class="level-pill selected" data-group="recirculation" data-val="fresh" onclick="selectPill(this)">Fresh air</div>
+          <div class="level-pill" data-group="recirculation" data-val="recirc" onclick="selectPill(this)">Recirc</div>
+          <div class="level-pill" data-group="recirculation" data-val="auto" onclick="selectPill(this)">Auto</div>
+        </div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Temperature set</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" id="temp-set" min="16" max="30" step="0.5" value="22"
+            style="width:70px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;font-family:'IBM Plex Mono',monospace;background:var(--surface);color:var(--text-primary);outline:none;text-align:center;" />
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-hint);">°C</span>
+        </div>
+      </div>
+      <div class="toggle-row" style="border-bottom:none;padding-bottom:0;">
+        <span class="toggle-label">Mode</span>
+        <div class="level-pills">
+          <div class="level-pill selected" data-group="auto-mode" data-val="manual" onclick="selectPill(this)">Manual</div>
+          <div class="level-pill" data-group="auto-mode" data-val="auto" onclick="selectPill(this)">Auto</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <p class="section-title">
+      Summary
+      <span id="elapsed-badge" style="display:none;" class="elapsed-badge">—</span>
+    </p>
+    <div class="control-card" style="border: 1.5px solid var(--accent);">
+      <div class="card-header" style="margin-bottom:0.5rem;"><span class="card-title">Current log snapshot</span></div>
+      <div class="summary-grid">
+        <div class="summary-item"><div class="s-label">Driver vent</div><div class="s-val" id="sum-driver-vent">—</div></div>
+        <div class="summary-item"><div class="s-label">Co-driver vent</div><div class="s-val" id="sum-passenger-vent">—</div></div>
+        <div class="summary-item"><div class="s-label">Driver dashboard vent</div><div class="s-val" id="sum-rear-left">—</div></div>
+        <div class="summary-item"><div class="s-label">Co-driver dashboard vent</div><div class="s-val" id="sum-rear-right">—</div></div>
+        <div class="summary-item"><div class="s-label">Airflow source</div><div class="s-val" id="sum-sources">—</div></div>
+        <div class="summary-item"><div class="s-label">Fan intensity</div><div class="s-val" id="sum-intensity">0 — Off</div></div>
+        <div class="summary-item"><div class="s-label">Steering wheel heat</div><div class="s-val" id="sum-sw">Off</div></div>
+        <div class="summary-item"><div class="s-label">Driver seat climate</div><div class="s-val" id="sum-driver-seat">Off</div></div>
+        <div class="summary-item"><div class="s-label">Co-driver seat climate</div><div class="s-val" id="sum-codriver-seat">Off</div></div>
+        <div class="summary-item"><div class="s-label">A/C / Recirc / Temp</div><div class="s-val" id="sum-ac">—</div></div>
+      </div>
+    </div>
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:1.5rem;font-size:13px;color:var(--text-secondary);font-family:'IBM Plex Mono',monospace;cursor:pointer;">
+      <input type="checkbox" id="prefill-checkbox" style="width:15px;height:15px;cursor:pointer;" />
+      Pre-fill next log with current values
+    </label>
+    <button class="btn-submit" id="submitBtn" onclick="submitToSheets()">Submit</button>
+    <button class="btn-new-response" id="newResponseBtn" onclick="newResponse()" style="display:none;">New log — same session</button>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJtHFjPsYwTatMtZK6_4Mbb_GrUjIiWKIU3wqDFVlqPiIVLadzxHl34KRgRFol50Wz/exec";
+
+    // ── Compass ──────────────────────────────────────────────
+    const dirMap = [
+      { val:315, arrow:"↖", label:"315°" },
+      { val:0,   arrow:"↑", label:"0°"   },
+      { val:45,  arrow:"↗", label:"45°"  },
+      { val:270, arrow:"←", label:"270°" },
+      { val:null,arrow:"●", label:"Center", center:true },
+      { val:90,  arrow:"→", label:"90°"  },
+      { val:225, arrow:"↙", label:"225°" },
+      { val:180, arrow:"↓", label:"180°" },
+      { val:135, arrow:"↘", label:"135°" },
+    ];
+    const ventIds = ["driver","passenger","rear-left","rear-right"];
+    const ventDirs = {};
+
+    function buildCompass(ventId) {
+      const container = document.getElementById("compass-" + ventId);
+      dirMap.forEach(d => {
+        const btn = document.createElement("div");
+        btn.className = "dir-btn" + (d.center ? " center-dot" : "");
+        btn.title = d.label;
+        if (d.center) {
+          btn.textContent = "●";
+        } else {
+          btn.innerHTML = '<span style="font-size:13px;line-height:1;">' + d.arrow + '</span><span style="font-size:8px;font-family:\'IBM Plex Mono\',monospace;line-height:1;color:inherit;opacity:0.75;">' + d.val + '°</span>';
+          btn.style.flexDirection = "column";
+          btn.style.gap = "1px";
+        }
+        btn.addEventListener("click", () => selectDir(ventId, d.val, btn, d.label));
+        container.appendChild(btn);
+      });
+    }
+    function selectDir(ventId, val, btn, label) {
+      document.getElementById("compass-" + ventId).querySelectorAll(".dir-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      ventDirs[ventId] = val;
+      document.getElementById("dir-" + ventId + "-label").textContent = label;
+      updateSummary();
+    }
+    ventIds.forEach(buildCompass);
+
+    // ── Source ───────────────────────────────────────────────
+    const activeSources = new Set();
+    function toggleSource(el, key) {
+      if (activeSources.has(key)) { activeSources.delete(key); el.classList.remove("selected"); }
+      else { activeSources.add(key); el.classList.add("selected"); }
+      updateSummary();
+    }
+
+    // ── Intensity ─────────────────────────────────────────────
+    const intensityLabels = ["Off","Very low","Low","Low-mid","Medium","Mid-high","High","Very high","Max"];
+    function updateIntensity() {
+      const v = parseInt(document.getElementById("intensity-slider").value);
+      document.getElementById("intensity-val").textContent = v + " — " + intensityLabels[v];
+      updateSummary();
+    }
+
+    // ── Standard pills ────────────────────────────────────────
+    function selectPill(el) {
+      const group = el.dataset.group;
+      document.querySelectorAll(".level-pill[data-group='" + group + "']").forEach(p => p.classList.remove("selected"));
+      el.classList.add("selected");
+      updateSummary();
+    }
+    function getPill(group) {
+      const sel = document.querySelector(".level-pill[data-group='" + group + "'].selected");
+      return sel ? sel.dataset.val : null;
+    }
+
+    // ── Seat climate pills ────────────────────────────────────
+    const seatState = { driver: "off", codriver: "off" };
+    const seatLevels = [
+      { val:"cool3", label:"❄ 3", type:"cool" },
+      { val:"cool2", label:"❄ 2", type:"cool" },
+      { val:"cool1", label:"❄ 1", type:"cool" },
+      null, // divider
+      { val:"off",   label:"Off",  type:"off"  },
+      null, // divider
+      { val:"heat1", label:"🔥 1", type:"heat" },
+      { val:"heat2", label:"🔥 2", type:"heat" },
+      { val:"heat3", label:"🔥 3", type:"heat" },
+    ];
+
+    function buildSeatPills(containerId, role) {
+      const container = document.getElementById(containerId);
+      seatLevels.forEach(lv => {
+        if (!lv) {
+          const div = document.createElement("div");
+          div.className = "seat-divider";
+          container.appendChild(div);
+          return;
+        }
+        const btn = document.createElement("div");
+        btn.className = "seat-pill" + (lv.val === "off" ? " sel-off" : "");
+        btn.textContent = lv.label;
+        btn.dataset.val = lv.val;
+        btn.addEventListener("click", () => {
+          container.querySelectorAll(".seat-pill").forEach(p => p.classList.remove("sel-cool","sel-off","sel-heat"));
+          btn.classList.add(lv.type === "cool" ? "sel-cool" : lv.type === "heat" ? "sel-heat" : "sel-off");
+          seatState[role] = lv.val;
+          updateSummary();
+        });
+        container.appendChild(btn);
+      });
+    }
+    buildSeatPills("driver-seat-pills",   "driver");
+    buildSeatPills("codriver-seat-pills", "codriver");
+
+    // ── Session ───────────────────────────────────────────────
+    let ignitionTime = null, elapsedTimer = null;
+
+    function applySession(isoString) {
+      ignitionTime = new Date(isoString);
+      const banner = document.getElementById("session-banner");
+      const btn    = document.getElementById("start-btn");
+      banner.classList.add("active");
+      btn.classList.add("started"); btn.textContent = "Restart";
+      const fmt = ignitionTime.toLocaleTimeString("en-GB", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      document.getElementById("elapsed-badge").style.display = "inline-block";
+      function tick() {
+        const s = Math.floor((Date.now() - ignitionTime.getTime()) / 1000);
+        document.getElementById("session-time-display").textContent =
+          "Started at " + fmt + " — " + Math.floor(s/60) + "m " + String(s%60).padStart(2,"0") + "s elapsed";
+        document.getElementById("elapsed-badge").textContent =
+          Math.floor(s/60) + "m " + String(s%60).padStart(2,"0") + "s elapsed";
+      }
+      if (elapsedTimer) clearInterval(elapsedTimer);
+      elapsedTimer = setInterval(tick, 1000);
+      tick();
+    }
+
+    function startSession() {
+      const offset = parseInt(document.getElementById("offset-sec").value) || 0;
+      const iso    = new Date(Date.now() - offset * 1000).toISOString();
+      localStorage.setItem("hvac_ignition_time", iso);
+      applySession(iso);
+    }
+
+    // Restore session if already started on the other page
+    (function() {
+      const stored = localStorage.getItem("hvac_ignition_time");
+      if (stored) applySession(stored);
+    })();
+
+    // ── Summary ───────────────────────────────────────────────
+    function seatLabel(val) {
+      if (val === "off") return "Off";
+      if (val.startsWith("heat")) return "Heat level " + val.slice(-1);
+      if (val.startsWith("cool")) return "Cool level " + val.slice(-1);
+      return val;
+    }
+    function updateSummary() {
+      function ventLabel(v) { if (v === null) return "Center"; if (v === undefined || v === "") return "—"; return v + "°"; }
+      document.getElementById("sum-driver-vent").textContent    = ventLabel(ventDirs["driver"]);
+      document.getElementById("sum-passenger-vent").textContent = ventLabel(ventDirs["passenger"]);
+      document.getElementById("sum-rear-left").textContent      = ventLabel(ventDirs["rear-left"]);
+      document.getElementById("sum-rear-right").textContent     = ventLabel(ventDirs["rear-right"]);
+      document.getElementById("sum-sources").textContent        = activeSources.size ? [...activeSources].join(", ") : "—";
+      const iv = parseInt(document.getElementById("intensity-slider").value);
+      document.getElementById("sum-intensity").textContent      = iv + " — " + intensityLabels[iv];
+      const sw = getPill("sw-heat");
+      document.getElementById("sum-sw").textContent             = sw === "off" ? "Off" : "Level " + sw;
+      document.getElementById("sum-driver-seat").textContent    = seatLabel(seatState.driver);
+      document.getElementById("sum-codriver-seat").textContent  = seatLabel(seatState.codriver);
+      const ac  = getPill("ac-compressor");
+      const rc  = getPill("recirculation");
+      const tmp = document.getElementById("temp-set").value;
+      document.getElementById("sum-ac").textContent = "A/C: " + (ac||"—") + " | " + (rc||"—") + " | " + tmp + "°C";
+    }
+    document.getElementById("temp-set").addEventListener("input", updateSummary);
+
+    // ── Submit ────────────────────────────────────────────────
+    async function submitToSheets() {
+      const ts = new Date().toISOString();
+      const ignition_time = ignitionTime ? ignitionTime.toISOString() : "";
+      const elapsed_sec   = ignitionTime ? Math.floor((Date.now() - ignitionTime.getTime()) / 1000) : null;
+      const payload = {
+        type: "hvac_log", timestamp: ts, ignition_time, elapsed_sec,
+        vent_driver:     ventDirs["driver"]     || "",
+        vent_passenger:  ventDirs["passenger"]  || "",
+        vent_rear_left:  ventDirs["rear-left"]  || "",
+        vent_rear_right: ventDirs["rear-right"] || "",
+        airflow_sources: [...activeSources].join("|"),
+        fan_intensity:   parseInt(document.getElementById("intensity-slider").value),
+        sw_heat_level:   getPill("sw-heat") || "off",
+        driver_seat_climate:   seatState.driver,
+        codriver_seat_climate: seatState.codriver,
+        ac_compressor: getPill("ac-compressor") || "off",
+        recirculation: getPill("recirculation") || "fresh",
+        auto_mode:     getPill("auto-mode")     || "manual",
+        temp_set:      parseFloat(document.getElementById("temp-set").value),
+      };
+      const btn = document.getElementById("submitBtn");
+      const toast = document.getElementById("toast");
+      btn.disabled = true; btn.textContent = "Sending…"; toast.className = "toast";
+      try {
+        await fetch(SHEET_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ type: "hvac_log", rows:[payload] }) });
+        lastLog = payload;
+        toast.className = "toast success";
+        toast.textContent = "HVAC log submitted! Press 'New log' to record another snapshot.";
+        document.getElementById("newResponseBtn").style.display = "block";
+      } catch(err) {
+        toast.className = "toast error";
+        toast.textContent = "Error sending data. Check the Apps Script URL.";
+      }
+      btn.textContent = "Submit"; btn.disabled = false;
+    }
+
+    // ── Reset ─────────────────────────────────────────────────
+    let lastLog = null;
+
+    function resetAll() {
+      ventIds.forEach(id => {
+        ventDirs[id] = null;
+        document.getElementById("compass-" + id).querySelectorAll(".dir-btn").forEach(b => b.classList.remove("selected"));
+        document.getElementById("dir-" + id + "-label").textContent = "—";
+      });
+      activeSources.clear();
+      document.querySelectorAll(".source-option").forEach(el => el.classList.remove("selected"));
+      document.getElementById("intensity-slider").value = 0; updateIntensity();
+      document.querySelectorAll(".level-pill[data-group='sw-heat']").forEach((p,i) => {
+        if(i===0) p.classList.add("selected"); else p.classList.remove("selected");
+      });
+      ["driver-seat-pills","codriver-seat-pills"].forEach(cid => {
+        document.getElementById(cid).querySelectorAll(".seat-pill").forEach(p => {
+          p.classList.remove("sel-heat","sel-cool","sel-off");
+          if(p.dataset.val === "off") p.classList.add("sel-off");
+        });
+      });
+      seatState.driver = "off"; seatState.codriver = "off";
+      ["ac-compressor","recirculation","auto-mode"].forEach(g => {
+        document.querySelectorAll(".level-pill[data-group='" + g + "']").forEach((p,i) => {
+          if(i===0) p.classList.add("selected"); else p.classList.remove("selected");
+        });
+      });
+      document.getElementById("temp-set").value = 22;
+    }
+
+    function newResponse() {
+      const prefill = document.getElementById("prefill-checkbox").checked;
+      document.getElementById("toast").className = "toast";
+      document.getElementById("newResponseBtn").style.display = "none";
+      document.getElementById("prefill-checkbox").checked = false;
+
+      if (prefill && lastLog) {
+        // Restore vent directions
+        ventIds.forEach(id => {
+          const key = "vent_" + id.replace("-","_");
+          const val = lastLog[key];
+          ventDirs[id] = (val === "" || val === undefined) ? null : val;
+          const container = document.getElementById("compass-" + id);
+          container.querySelectorAll(".dir-btn").forEach(b => b.classList.remove("selected"));
+          dirMap.forEach((d, idx) => {
+            if (d.val === val) container.querySelectorAll(".dir-btn")[idx].classList.add("selected");
+          });
+          document.getElementById("dir-" + id + "-label").textContent =
+            val === null || val === "" || val === undefined ? "—" : val + "°";
+        });
+        // Restore sources
+        activeSources.clear();
+        document.querySelectorAll(".source-option").forEach(el => el.classList.remove("selected"));
+        if (lastLog.airflow_sources) {
+          lastLog.airflow_sources.split("|").filter(Boolean).forEach(src => {
+            activeSources.add(src);
+            const id = "src-" + src.replace(/_/g,"-");
+            const el = document.getElementById(id);
+            if (el) el.classList.add("selected");
+          });
+        }
+        // Restore intensity
+        document.getElementById("intensity-slider").value = lastLog.fan_intensity || 0;
+        updateIntensity();
+        // Restore steering wheel
+        document.querySelectorAll(".level-pill[data-group='sw-heat']").forEach(p => {
+          p.classList.remove("selected");
+          if (p.dataset.val === lastLog.sw_heat_level) p.classList.add("selected");
+        });
+        // Restore seat climate
+        ["driver","codriver"].forEach(role => {
+          const val = lastLog[role + "_seat_climate"] || "off";
+          seatState[role] = val;
+          const container = document.getElementById(role + "-seat-pills");
+          container.querySelectorAll(".seat-pill").forEach(p => {
+            p.classList.remove("sel-heat","sel-cool","sel-off");
+            if (p.dataset.val === val)
+              p.classList.add(val.startsWith("heat") ? "sel-heat" : val.startsWith("cool") ? "sel-cool" : "sel-off");
+          });
+        });
+        // Restore A/C
+        [["ac-compressor", lastLog.ac_compressor],
+         ["recirculation",  lastLog.recirculation],
+         ["auto-mode",      lastLog.auto_mode]].forEach(([g, v]) => {
+          document.querySelectorAll(".level-pill[data-group='" + g + "']").forEach(p => {
+            p.classList.remove("selected");
+            if (p.dataset.val === v) p.classList.add("selected");
+          });
+        });
+        document.getElementById("temp-set").value = lastLog.temp_set || 22;
+      } else {
+        resetAll();
+      }
+
+      updateSummary();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    updateSummary();
+  </script>
+</body>
+</html>

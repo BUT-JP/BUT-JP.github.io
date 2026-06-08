@@ -1,0 +1,123 @@
+function doGet(e) {
+  const email    = e.parameter.email;
+  const callback = e.parameter.callback;
+  const sheet    = SpreadsheetApp.getActiveSpreadsheet();
+  const profileSheet = sheet.getSheetByName("Profiles");
+
+  let result = { found: false };
+
+  if (profileSheet) {
+    const data = profileSheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][1] === email) {
+        result = { found: true, participant_id: data[i][0] };
+        break;
+      }
+    }
+  }
+
+  const json   = JSON.stringify(result);
+  const output = callback ? callback + "(" + json + ")" : json;
+  return ContentService
+    .createTextOutput(output)
+    .setMimeType(callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet();
+  const data  = JSON.parse(e.postData.contents);
+
+  // ── PROFILE ──────────────────────────────────────────────────────────────
+  if (data.type === "profile") {
+    let profileSheet = sheet.getSheetByName("Profiles");
+    if (!profileSheet) {
+      profileSheet = sheet.insertSheet("Profiles");
+      profileSheet.appendRow([
+        "participant_id","email","age","gender","height_cm","weight_kg",
+        "nationality","cold_heat_sensitivity","created_at"
+      ]);
+    }
+    if (profileSheet.getLastRow() === 0) {
+      profileSheet.appendRow([
+        "participant_id","email","age","gender","height_cm","weight_kg",
+        "nationality","cold_heat_sensitivity","created_at"
+      ]);
+    }
+    profileSheet.appendRow([
+      data.participant_id, data.email, data.age, data.gender,
+      data.height_cm, data.weight_kg, data.nationality,
+      data.cold_heat_sensitivity, data.created_at
+    ]);
+
+  // ── HVAC LOG ─────────────────────────────────────────────────────────────
+  } else if (data.type === "hvac_log") {
+    let hvacSheet = sheet.getSheetByName("HVAC");
+    if (!hvacSheet) {
+      hvacSheet = sheet.insertSheet("HVAC");
+      hvacSheet.appendRow([
+        "timestamp",
+        "ignition_time",
+        "elapsed_sec",
+        "vent_driver",
+        "vent_passenger",
+        "vent_rear_left",
+        "vent_rear_right",
+        "airflow_sources",
+        "fan_intensity",
+        "sw_heat_level",
+        "driver_seat_climate",
+        "codriver_seat_climate",
+        "ac_compressor",
+        "recirculation",
+        "auto_mode",
+        "temp_set"
+      ]);
+    }
+    const row = data.rows[0];
+    hvacSheet.appendRow([
+      row.timestamp,
+      row.ignition_time,
+      row.elapsed_sec,
+      row.vent_driver,
+      row.vent_passenger,
+      row.vent_rear_left,
+      row.vent_rear_right,
+      row.airflow_sources,
+      row.fan_intensity,
+      row.sw_heat_level,
+      row.driver_seat_climate,
+      row.codriver_seat_climate,
+      row.ac_compressor,
+      row.recirculation,
+      row.auto_mode,
+      row.temp_set
+    ]);
+
+  // ── THERMAL COMFORT SURVEY ───────────────────────────────────────────────
+  } else {
+    let surveySheet = sheet.getSheetByName("Survey");
+    if (!surveySheet) {
+      surveySheet = sheet.insertSheet("Survey");
+    }
+    if (surveySheet.getLastRow() === 0) {
+      surveySheet.appendRow([
+        "timestamp","participant_id","season","clothing","position",
+        "coming_from","ignition_time","body_part",
+        "thermal_sensation","thermal_comfort","wanted_action"
+      ]);
+    }
+    data.rows.forEach(row => {
+      surveySheet.appendRow([
+        row.timestamp, row.participant_id, row.season, row.clothing,
+        row.position, row.coming_from, row.ignition_time, row.body_part,
+        row.thermal_sensation, row.thermal_comfort, row.wanted_action
+      ]);
+    });
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "ok" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
