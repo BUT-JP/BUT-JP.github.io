@@ -97,7 +97,6 @@
     .body-part-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; }
     .body-part-card.initial-card { border-color: var(--accent); border-width: 1.5px; }
     .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
-    .card-header-right { margin-left: auto; display: flex; align-items: center; }
     .part-title { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; }
     .section-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
     .tag-back    { background: var(--tag-back-bg);  color: var(--tag-back-fg); }
@@ -105,28 +104,6 @@
     .tag-head    { background: var(--tag-head-bg);  color: var(--tag-head-fg); }
     .tag-limbs   { background: var(--tag-limbs-bg); color: var(--tag-limbs-fg); }
     .tag-initial { background: #F5F3EE; color: #1A1916; border: 1px solid var(--border); }
-
-    /* Sweating checkbox */
-    .sweat-label {
-      display: flex; align-items: center; gap: 6px;
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-      color: var(--text-secondary); cursor: pointer;
-      padding: 3px 8px; border-radius: var(--radius-sm);
-      border: 1px solid var(--border); background: var(--bg);
-      transition: background 0.1s, border-color 0.1s;
-      white-space: nowrap;
-    }
-    .sweat-label:hover { background: #ECEAE4; }
-    .sweat-label input[type="checkbox"] { display: none; }
-    .sweat-dot {
-      width: 13px; height: 13px; border-radius: 3px;
-      border: 1.5px solid var(--border); flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.1s, border-color 0.1s;
-    }
-    .sweat-label input[type="checkbox"]:checked ~ .sweat-dot { background: #185FA5; border-color: #185FA5; }
-    .sweat-label input[type="checkbox"]:checked ~ .sweat-dot::after { content: '✓'; font-size: 9px; color: white; line-height: 1; }
-    .sweat-label input[type="checkbox"]:checked ~ .sweat-text { color: #185FA5; }
 
     .metrics-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
     .metric-block { display: flex; flex-direction: column; gap: 5px; }
@@ -137,41 +114,6 @@
     input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
     input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
     .scale-ends { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-hint); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
-
-    /* Air quality section */
-    .air-quality-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px;
-    }
-    .air-quality-card .card-label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary);
-      margin-bottom: 1rem;
-    }
-    .aq-grade-row { display: flex; gap: 8px; }
-    .aq-grade-option { flex: 1; }
-    .aq-grade-option input[type="radio"] { display: none; }
-    .aq-grade-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 10px 6px; border-radius: var(--radius-sm);
-      border: 1px solid var(--border); background: var(--bg);
-      cursor: pointer; text-align: center;
-      transition: border-color 0.1s, background 0.1s;
-    }
-    .aq-grade-btn:hover { background: #ECEAE4; }
-    .aq-grade-option input[type="radio"]:checked + .aq-grade-btn { border-color: var(--accent); background: var(--surface); }
-    .aq-num {
-      font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500;
-      color: var(--text-primary); line-height: 1;
-    }
-    .aq-grade-option input[type="radio"]:checked + .aq-grade-btn .aq-num { color: var(--accent); }
-    .aq-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.3; font-family: 'IBM Plex Mono', monospace; }
-    .aq-grade-option:nth-child(1) .aq-num { color: #27500A; }
-    .aq-grade-option:nth-child(2) .aq-num { color: #3B6D11; }
-    .aq-grade-option:nth-child(3) .aq-num { color: #633806; }
-    .aq-grade-option:nth-child(4) .aq-num { color: #A32D2D; }
-    .aq-grade-option:nth-child(5) .aq-num { color: #791F1F; }
-    .aq-grade-option input[type="radio"]:checked + .aq-grade-btn .aq-num { color: inherit; }
 
     .session-banner {
       display: flex; align-items: center; justify-content: space-between;
@@ -217,7 +159,7 @@
     .toast.error   { display: block; background: var(--error-bg);   color: var(--error-fg); }
 
     @media (max-width: 720px) { .top-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px) { .top-grid, .meta-row { grid-template-columns: 1fr; } .metrics-grid { grid-template-columns: 1fr; } .legend-item { font-size: 9px; } .aq-grade-row { flex-wrap: wrap; } .aq-grade-option { min-width: calc(33% - 6px); } }
+    @media (max-width: 560px) { .top-grid, .meta-row { grid-template-columns: 1fr; } .metrics-grid { grid-template-columns: 1fr; } .legend-item { font-size: 9px; } }
 
     .tab-bar { max-width: 720px; margin: 0 auto 2rem; display: flex; border-bottom: 2px solid var(--border); }
     .tab-link { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-secondary); padding: 10px 18px; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; letter-spacing: 0.04em; }
@@ -232,11 +174,11 @@
     <p>Rate each body region across three dimensions: thermal sensation, thermal comfort, and wanted action. Scale: −3 to +3 (ASHRAE 7-point). Decimal values (e.g. 0.5, 1.5) are supported.</p>
   </div>
 
+  
   <div class="tab-bar">
     <a href="hvac_controls.html" class="tab-link">HVAC Controls Log</a>
     <a href="index.html" class="tab-link active">Thermal Comfort Survey</a>
   </div>
-
   <div class="scale-legend">
     <h3>Scale reference</h3>
     <div class="legend-grid">
@@ -340,13 +282,6 @@
       <div class="card-header">
         <span class="part-title">Whole body</span>
         <span class="section-tag tag-initial">initial state</span>
-        <div class="card-header-right">
-          <label class="sweat-label">
-            <input type="checkbox" id="initial_sweat" />
-            <span class="sweat-dot"></span>
-            <span class="sweat-text">Sweating</span>
-          </label>
-        </div>
       </div>
       <div class="metrics-grid">
         <div class="metric-block">
@@ -378,13 +313,6 @@
       <div class="card-header">
         <span class="part-title">Whole body</span>
         <span class="section-tag tag-initial">overall</span>
-        <div class="card-header-right">
-          <label class="sweat-label">
-            <input type="checkbox" id="overall_sweat" />
-            <span class="sweat-dot"></span>
-            <span class="sweat-text">Sweating</span>
-          </label>
-        </div>
       </div>
       <div class="metrics-grid">
         <div class="metric-block">
@@ -408,49 +336,6 @@
       </div>
     </div>
 
-    <!-- AIR QUALITY -->
-    <p class="section-title">Air quality</p>
-    <div class="air-quality-card">
-      <div class="card-label">Rate the cabin air quality — 1 (excellent) to 5 (very poor)</div>
-      <div class="aq-grade-row">
-        <div class="aq-grade-option">
-          <input type="radio" name="air_quality" id="aq1" value="1" />
-          <label class="aq-grade-btn" for="aq1">
-            <span class="aq-num">1</span>
-            <span class="aq-desc">Excellent<br>Fresh, clean</span>
-          </label>
-        </div>
-        <div class="aq-grade-option">
-          <input type="radio" name="air_quality" id="aq2" value="2" />
-          <label class="aq-grade-btn" for="aq2">
-            <span class="aq-num">2</span>
-            <span class="aq-desc">Good<br>Acceptable</span>
-          </label>
-        </div>
-        <div class="aq-grade-option">
-          <input type="radio" name="air_quality" id="aq3" value="3" />
-          <label class="aq-grade-btn" for="aq3">
-            <span class="aq-num">3</span>
-            <span class="aq-desc">Average<br>Noticeable</span>
-          </label>
-        </div>
-        <div class="aq-grade-option">
-          <input type="radio" name="air_quality" id="aq4" value="4" />
-          <label class="aq-grade-btn" for="aq4">
-            <span class="aq-num">4</span>
-            <span class="aq-desc">Poor<br>Stuffy / odour</span>
-          </label>
-        </div>
-        <div class="aq-grade-option">
-          <input type="radio" name="air_quality" id="aq5" value="5" />
-          <label class="aq-grade-btn" for="aq5">
-            <span class="aq-num">5</span>
-            <span class="aq-desc">Very poor<br>Unacceptable</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
     <label style="display:flex;align-items:center;gap:8px;margin-top:1.5rem;font-size:13px;color:var(--text-secondary);font-family:'IBM Plex Mono',monospace;cursor:pointer;">
       <input type="checkbox" id="prefill-checkbox" style="width:15px;height:15px;cursor:pointer;" />
       Pre-fill next response with current values
@@ -462,8 +347,7 @@
   </div>
 
   <script>
-       const SHEET_URL = "https://script.google.com/macros/s/AKfycbzwEKkJKnWKGqGGHV-6hBw2q30u-qnT_3CelYV2duTJi7wFKqFdaqnDME0kXPkpez22fw/exec";
-       //const SHEET_URL = "https://script.google.com/macros/s/AKfycby3gXO-bsLQGZ9bmgq57wDplyMoclZAoUcQWelB2cCd_4l52Fx7PLBY3JwZ7PAah9GZ8A/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycby3gXO-bsLQGZ9bmgq57wDplyMoclZAoUcQWelB2cCd_4l52Fx7PLBY3JwZ7PAah9GZ8A/exec";
 
     const bodyParts = [
       { id: "upper_back",   label: "Upper back",     tag: "back" },
@@ -510,7 +394,7 @@
       const fmt = ignitionTime.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       function tick() {
         const s = Math.floor((Date.now() - ignitionTime.getTime()) / 1000);
-        display.textContent = "Started at " + fmt + " · " + Math.floor(s/60) + "m " + String(s%60).padStart(2,"0") + "s elapsed";
+        display.textContent = "Started at " + fmt + " ? " + Math.floor(s/60) + "m " + String(s%60).padStart(2,"0") + "s elapsed";
       }
       if (elapsedTimer) clearInterval(elapsedTimer);
       elapsedTimer = setInterval(tick, 1000);
@@ -524,6 +408,7 @@
       applySession(iso);
     }
 
+    // Restore session if already started on the other page
     (function() {
       const stored = localStorage.getItem("hvac_ignition_time");
       if (stored) applySession(stored);
@@ -532,20 +417,15 @@
     function newResponse() {
       const prefill = document.getElementById("prefill-checkbox").checked;
 
-      const defaults = { initial: { sens: 0, comf: 0, act: 0, sweat: false }, overall: { sens: 0, comf: 2, act: 0, sweat: false } };
-      bodyParts.forEach(p => { defaults[p.id] = { sens: 0, comf: 2, act: 0, sweat: false }; });
+      const defaults = { initial: { sens: 0, comf: 0, act: 0 }, overall: { sens: 0, comf: 2, act: 0 } };
+      bodyParts.forEach(p => { defaults[p.id] = { sens: 0, comf: 2, act: 0 }; });
 
       ["initial", ...bodyParts.map(p => p.id), "overall"].forEach(id => {
         const vals = prefill && lastValues[id] ? lastValues[id] : defaults[id];
         document.getElementById(id + "_sens").value = vals.sens; updateLabel(id + "_sens", sensText);
         document.getElementById(id + "_comf").value = vals.comf; updateLabel(id + "_comf", comfText);
         document.getElementById(id + "_act").value  = vals.act;  updateLabel(id + "_act",  actText);
-        const sweatEl = document.getElementById(id + "_sweat");
-        if (sweatEl) sweatEl.checked = prefill ? (vals.sweat || false) : false;
       });
-
-      // reset air quality
-      document.querySelectorAll('input[name="air_quality"]').forEach(r => r.checked = false);
 
       document.getElementById("newResponseBtn").style.display = "none";
       document.getElementById("prefill-checkbox").checked = false;
@@ -610,13 +490,6 @@
         <div class="card-header">
           <span class="part-title">${part.label}</span>
           <span class="section-tag tag-${part.tag}">${tagLabel[part.tag]}</span>
-          <div class="card-header-right">
-            <label class="sweat-label">
-              <input type="checkbox" id="${part.id}_sweat" />
-              <span class="sweat-dot"></span>
-              <span class="sweat-text">Sweating</span>
-            </label>
-          </div>
         </div>
         <div class="metrics-grid">
           <div class="metric-block">
@@ -653,8 +526,6 @@
       const position   = (document.querySelector('input[name="position"]:checked') || {}).value || "";
       const cfRadio    = document.querySelector('input[name="coming_from"]:checked');
       const comingFrom = cfRadio ? (cfRadio.value === "other" ? (document.getElementById("coming-from-other").value.trim() || "other") : cfRadio.value) : "";
-      const aqRadio    = document.querySelector('input[name="air_quality"]:checked');
-      const airQuality = aqRadio ? parseInt(aqRadio.value) : "";
       const btn        = document.getElementById("submitBtn");
       const toast      = document.getElementById("toast");
 
@@ -663,27 +534,24 @@
       const rows = [
         {
           timestamp: ts, participant_id: pid, season: session, clothing, position, coming_from: comingFrom,
-          ignition_time, air_quality: airQuality,
+          ignition_time,
           body_part: "Whole body (initial)",
-          sweating: document.getElementById("initial_sweat").checked,
           thermal_sensation: parseFloat(document.getElementById("initial_sens").value),
           thermal_comfort:   parseFloat(document.getElementById("initial_comf").value),
           wanted_action:     parseFloat(document.getElementById("initial_act").value)
         },
         ...bodyParts.map(part => ({
           timestamp: ts, participant_id: pid, season: session, clothing, position, coming_from: comingFrom,
-          ignition_time, air_quality: airQuality,
+          ignition_time,
           body_part: part.label,
-          sweating: document.getElementById(part.id + "_sweat").checked,
           thermal_sensation: parseFloat(document.getElementById(part.id + "_sens").value),
           thermal_comfort:   parseFloat(document.getElementById(part.id + "_comf").value),
           wanted_action:     parseFloat(document.getElementById(part.id + "_act").value)
         })),
         {
           timestamp: ts, participant_id: pid, season: session, clothing, position, coming_from: comingFrom,
-          ignition_time, air_quality: airQuality,
+          ignition_time,
           body_part: "Whole body (overall)",
-          sweating: document.getElementById("overall_sweat").checked,
           thermal_sensation: parseFloat(document.getElementById("overall_sens").value),
           thermal_comfort:   parseFloat(document.getElementById("overall_comf").value),
           wanted_action:     parseFloat(document.getElementById("overall_act").value)
@@ -704,17 +572,16 @@
         toast.textContent = "Submitted! Press 'New response' to fill again with the same session context.";
         btn.textContent   = "Submit";
 
+        // Show post-submit options (checkbox + new response button)
         document.getElementById("newResponseBtn").style.display = "block";
 
-        // Save current values for prefill
+        // Save current slider values for prefill before resetting
         lastValues = {};
         ["initial", ...bodyParts.map(p => p.id), "overall"].forEach(id => {
-          const sweatEl = document.getElementById(id + "_sweat");
           lastValues[id] = {
-            sens:  parseFloat(document.getElementById(id + "_sens").value),
-            comf:  parseFloat(document.getElementById(id + "_comf").value),
-            act:   parseFloat(document.getElementById(id + "_act").value),
-            sweat: sweatEl ? sweatEl.checked : false
+            sens: parseFloat(document.getElementById(id + "_sens").value),
+            comf: parseFloat(document.getElementById(id + "_comf").value),
+            act:  parseFloat(document.getElementById(id + "_act").value)
           };
         });
 
@@ -722,21 +589,16 @@
         document.getElementById("initial_sens").value = 0; document.getElementById("initial_sens_lbl").textContent = "Neutral (0)";
         document.getElementById("initial_comf").value = 0; document.getElementById("initial_comf_lbl").textContent = "- (0)";
         document.getElementById("initial_act").value  = 0; document.getElementById("initial_act_lbl").textContent  = "No change (0)";
-        document.getElementById("initial_sweat").checked = false;
 
         bodyParts.forEach(p => {
           document.getElementById(p.id + "_sens").value = 0; document.getElementById(p.id + "_sens_lbl").textContent = "Neutral (0)";
           document.getElementById(p.id + "_comf").value = 2; document.getElementById(p.id + "_comf_lbl").textContent = "Comfortable (+2)";
           document.getElementById(p.id + "_act").value  = 0; document.getElementById(p.id + "_act_lbl").textContent  = "No change (0)";
-          document.getElementById(p.id + "_sweat").checked = false;
         });
 
         document.getElementById("overall_sens").value = 0; document.getElementById("overall_sens_lbl").textContent = "Neutral (0)";
         document.getElementById("overall_comf").value = 2; document.getElementById("overall_comf_lbl").textContent = "Comfortable (+2)";
         document.getElementById("overall_act").value  = 0; document.getElementById("overall_act_lbl").textContent  = "No change (0)";
-        document.getElementById("overall_sweat").checked = false;
-
-        document.querySelectorAll('input[name="air_quality"]').forEach(r => r.checked = false);
 
       } catch (err) {
         toast.className   = "toast error";

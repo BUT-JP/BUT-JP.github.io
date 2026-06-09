@@ -103,16 +103,14 @@ function doPost(e) {
       surveySheet.appendRow([
         "timestamp","participant_id","season","clothing","position",
         "coming_from","ignition_time","body_part",
-        "thermal_sensation","thermal_comfort","wanted_action",
-        "sweating","air_quality"
+        "thermal_sensation","thermal_comfort","wanted_action"
       ]);
     }
     data.rows.forEach(row => {
       surveySheet.appendRow([
         row.timestamp, row.participant_id, row.season, row.clothing,
         row.position, row.coming_from, row.ignition_time, row.body_part,
-        row.thermal_sensation, row.thermal_comfort, row.wanted_action,
-        row.sweating, row.air_quality
+        row.thermal_sensation, row.thermal_comfort, row.wanted_action
       ]);
     });
   }
@@ -121,3 +119,5 @@ function doPost(e) {
     .createTextOutput(JSON.stringify({ status: "ok" }))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+
